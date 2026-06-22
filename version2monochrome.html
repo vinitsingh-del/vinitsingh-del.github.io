@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GATACA NMN 500 PDP Monochrome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f1512;
+  --muted:#5e6962;
+  --paper:#f1f1f1;
+  --panel:#f7faf4;
+  --white:#fff;
+  --line:#d8e3d7;
+  --green:#222222;
+  --leaf:#777777;
+  --soft:#ececec;
+  --blue:#222222;
+  --lime:#d8d8d8;
+  --gold:#f3b657;
+  --danger:#925241;
+  --shadow:0 26px 70px rgba(15,21,18,.12);
+}
+:root{
+  --ink:#111;
+  --muted:#686868;
+  --paper:#f1f1f1;
+  --panel:#f8f8f8;
+  --white:#fff;
+  --line:#d7d7d7;
+  --green:#222;
+  --leaf:#777;
+  --soft:#ececec;
+  --blue:#222;
+  --lime:#d8d8d8;
+  --gold:#9a9a9a;
+  --danger:#555;
+  --shadow:0 26px 70px rgba(0,0,0,.12);
+}
+html{scroll-behavior:smooth}
+body{font-family:Manrope,Arial,sans-serif;background:var(--paper);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;overflow-x:hidden;text-rendering:optimizeLegibility}
+button,a{font:inherit}
+button{cursor:pointer}
+img{display:block;max-width:100%}
+.preloader{position:fixed;inset:0;z-index:999;background:#f1f1f1;display:grid;place-items:center;transition:opacity .55s ease,visibility .55s ease}
+.preloader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.preloader-mark{width:min(280px,72vw);height:min(280px,72vw);border-radius:50%;display:grid;place-items:center;position:relative;color:var(--green);font-size:clamp(30px,7vw,54px);font-weight:850;letter-spacing:.1em}
+.preloader-mark::before,.preloader-mark::after{content:'';position:absolute;inset:0;border-radius:50%;border:1px solid rgba(47,91,66,.18)}
+.preloader-mark::before{animation:preloadSpin 1.8s linear infinite;border-top-color:var(--green);border-right-color:rgba(47,91,66,.46)}
+.preloader-mark::after{inset:34px;border-color:rgba(47,91,66,.1);background:rgba(255,255,255,.42);box-shadow:0 24px 80px rgba(47,91,66,.12)}
+.preloader-mark span{position:relative;z-index:2}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(15,21,18,.08)}
+.nav-inner{height:88px;max-width:1120px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{font-size:28px;font-weight:800;letter-spacing:.09em;color:var(--green);text-decoration:none}
+.search-pill{border:2px solid var(--ink);border-radius:999px;min-width:min(330px,52vw);height:52px;background:var(--white);display:flex;align-items:center;gap:10px;padding:0 20px;color:var(--muted);font-size:18px}
+.search-pill svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2}
+.hero-frame{background:var(--white);padding:18px 16px 0;text-align:center;position:relative;overflow:hidden}
+.hero-frame h1{font-size:clamp(24px,3.4vw,36px);line-height:1.02;letter-spacing:-.05em;font-weight:650;max-width:760px;margin:0 auto 14px;text-wrap:balance;color:#0f1512}
+.hero-frame h1 .hero-kicker{display:block;font-size:12px;line-height:1;letter-spacing:.12em;font-weight:850;color:var(--green);margin-bottom:10px}
+.hero-frame h1 em{font-style:italic;color:var(--green);font-weight:700}
+.hero-frame h1 .hero-subline{display:block;margin-top:6px;font-weight:520;color:#333333;letter-spacing:-.035em}
+.hero-art{position:relative;min-height:430px;display:grid;place-items:center;max-width:820px;margin:0 auto;isolation:isolate}
+.hero-art::before{content:'';position:absolute;width:min(43.2vw,312px);height:min(46.4vw,360px);border-radius:47% 53% 45% 55%;background:linear-gradient(145deg,#151515 0%,#555555 58%,#9a9a9a 100%);transform:rotate(18deg);opacity:.98;box-shadow:0 34px 76px rgba(47,91,66,.2);animation:axisRotate 14s linear infinite;transform-origin:center}
+.hero-art::after{content:'';position:absolute;width:min(38vw,264px);height:min(27vw,168px);border-radius:50%;background:radial-gradient(closest-side,rgba(47,91,66,.16),transparent 70%);bottom:22px;filter:blur(10px)}
+.hero-slide{position:absolute;inset:0;display:grid;place-items:center;opacity:0;transform:translateY(14px) scale(.975);transition:opacity .7s ease,transform .7s ease;z-index:2;pointer-events:none}
+.hero-slide.active{opacity:1;transform:translateY(0) scale(1)}
+.hero-product{position:relative;z-index:2;width:min(43vw,307px);height:auto;filter:drop-shadow(0 30px 34px rgba(15,21,18,.25));animation:float 5.5s ease-in-out infinite;transition:transform .45s ease,filter .45s ease}
+.hero-layer{position:relative;z-index:2;width:min(80vw,620px);height:auto;max-height:410px;object-fit:contain;filter:drop-shadow(0 24px 44px rgba(15,21,18,.16))}
+.hero-slide:nth-child(2) .hero-layer{width:min(78vw,590px)}
+.hero-slide:nth-child(3) .hero-layer{width:min(82vw,620px)}
+.hero-composite{position:relative;z-index:2;width:min(86vw,690px);min-height:360px;display:grid;align-items:center}
+.hero-testimonial{grid-template-columns:minmax(220px,.86fr) minmax(220px,.78fr);gap:18px}
+.hero-glass-copy{justify-self:end;text-align:left;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.72);box-shadow:0 22px 64px rgba(15,21,18,.13);backdrop-filter:blur(20px) saturate(1.12);border-radius:24px;padding:24px;max-width:330px}
+.hero-glass-copy b{display:block;font-size:clamp(22px,2.9vw,34px);line-height:1.04;letter-spacing:-.045em;color:#0f1512;margin-bottom:18px}
+.hero-glass-copy p{font-size:clamp(15px,1.8vw,19px);line-height:1.28;color:#333333;margin:0}
+.hero-glass-copy strong{display:block;margin-top:2px;font-weight:850}
+.hero-stars{display:block;color:#111111;letter-spacing:.16em;font-size:18px;margin-top:18px}
+.hero-person{justify-self:start;width:min(32vw,265px);max-height:360px;object-fit:contain;filter:drop-shadow(0 24px 34px rgba(15,21,18,.18))}
+.hero-biology{grid-template-columns:minmax(190px,.72fr) minmax(220px,.75fr) minmax(160px,.56fr);gap:12px}
+.bio-title{position:absolute;top:-2px;left:0;right:0;text-align:center;font-size:clamp(18px,2.3vw,28px);font-weight:900;letter-spacing:.08em;color:#0f1512;z-index:5}
+.bio-copy{justify-self:end;text-align:left;background:rgba(255,255,255,.56);border:1px solid rgba(255,255,255,.65);border-radius:22px;padding:20px;backdrop-filter:blur(18px);box-shadow:0 18px 54px rgba(15,21,18,.1)}
+.bio-copy h3,.bio-nmn h3{font-size:clamp(32px,4.2vw,54px);line-height:.9;letter-spacing:-.06em;margin:0 0 12px;color:#0f1512}
+.bio-copy p,.bio-nmn p{font-size:clamp(14px,1.7vw,18px);line-height:1.18;color:#0f1512;margin:0}
+.bio-copy ul{list-style:none;display:grid;gap:12px;margin:0;padding:0}
+.bio-copy li{position:relative;padding-right:28px}
+.bio-copy li::after{content:'';position:absolute;right:0;top:.65em;width:18px;height:2px;background:#0f1512;box-shadow:18px 0 0 #0f1512}
+.bio-product{justify-self:center;width:min(33vw,260px);filter:drop-shadow(0 26px 32px rgba(15,21,18,.22));transform:rotate(10deg);animation:float 5.5s ease-in-out infinite;margin-top:26px}
+.bio-nmn{justify-self:start;text-align:center;background:rgba(255,255,255,.56);border:1px solid rgba(255,255,255,.65);border-radius:22px;padding:20px;backdrop-filter:blur(18px);box-shadow:0 18px 54px rgba(15,21,18,.1)}
+.hero-art:hover .hero-product{transform:translateY(-4px) scale(1.015);filter:drop-shadow(0 34px 40px rgba(15,21,18,.28))}
+.benefit-tabs{max-width:980px;margin:0 auto 10px;display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(15,21,18,.42);background:rgba(255,255,255,.9);box-shadow:0 18px 44px rgba(15,21,18,.07);clip-path:polygon(24px 0,100% 0,100% 100%,0 100%,0 24px);overflow:hidden}
+.benefit-card{min-height:78px;border:0;border-right:1px solid rgba(15,21,18,.38);background:rgba(255,255,255,.68);padding:16px 18px;text-align:center;display:grid;place-items:center;position:relative;overflow:hidden;transition:background .24s ease,color .24s ease}
+.benefit-card:last-child{border-right:none}
+.benefit-card:hover{background:#f4f8f3}
+.benefit-card b{display:block;font-size:clamp(16px,1.7vw,20px);line-height:1.08;letter-spacing:-.025em;color:var(--ink);font-weight:600}
+.benefit-card span,.benefit-icon{display:none}
+.benefit-card.active{background:#f9fbf8;color:var(--ink)}
+.benefit-card.active::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--green);transform-origin:left;animation:tabPulse 4.5s ease-in-out infinite}
+.benefit-card.active b{color:var(--ink)}
+.fineprint{font-size:9px;color:var(--muted);margin:0 auto 14px;max-width:720px}
+.marquee{background:#e8e8e8;border-block:1px solid #d0d0d0;overflow:hidden;color:#111111}
+.marquee-track{display:flex;width:max-content;animation:scroll 28s linear infinite}
+.marquee span{padding:12px 28px;white-space:nowrap;font-weight:800;font-size:15px}
+.product-info{background:#f3f3f3;padding:30px 16px 38px;border-bottom:1px solid var(--line)}
+.product-inner{max-width:1120px;margin:0 auto;background:rgba(255,255,255,.78);border:1px solid #d2ddd2;border-radius:22px;padding:28px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(330px,.9fr);gap:28px;align-items:stretch;box-shadow:0 22px 70px rgba(15,21,18,.07)}
+.product-copy{display:flex;flex-direction:column;justify-content:space-between;min-height:260px}
+.tags{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.tag{border:1px solid #b9c8ba;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:850;letter-spacing:.12em;text-transform:uppercase;color:var(--green);background:#ffffff}
+.tag.fill{background:#111111;border-color:#111111;color:var(--white)}
+.product-title{font-size:clamp(22px,2.65vw,31px);line-height:1.09;letter-spacing:-.042em;color:#111111;font-weight:650;max-width:690px;text-wrap:balance;margin:0}
+.rating-row{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #d4ded4;border-radius:18px;overflow:hidden;background:#ffffff;color:#111111}
+.rating-row .rank,.rating-row .rating-proof{padding:22px;min-height:148px;display:flex;flex-direction:column;justify-content:space-between}
+.rating-row .rank{border-right:1px solid #d4ded4}
+.rank strong{font-size:clamp(38px,5vw,54px);line-height:.85;letter-spacing:-.08em}
+.rank span,.rating-label{font-size:13px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#666666;line-height:1.3}
+.stars{color:var(--green);font-size:24px;letter-spacing:2px}
+.rating-link{text-decoration:underline;text-underline-offset:3px;color:#111111}
+.rating-score{font-size:20px;font-weight:800;color:#111111;margin-top:8px}
+.size-row{margin:0}
+.size-row b{font-size:22px}
+.size-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.size-card{border:1px solid var(--line);border-radius:14px;background:var(--white);padding:14px;position:relative}
+.size-card.active{border-color:var(--green);box-shadow:0 0 0 4px rgba(125,163,120,.16)}
+.size-card small{display:block;color:var(--muted);margin-top:3px}
+.buy-actions{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}
+.add{border:none;background:var(--green);color:var(--white);border-radius:999px;padding:17px 22px;font-weight:800;font-size:16px;position:relative;overflow:hidden;box-shadow:0 14px 36px rgba(47,91,66,.18)}
+.add::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 0 34%,rgba(255,255,255,.24) 45%,transparent 56% 100%);transform:translateX(-110%);animation:buttonShine 6s ease-in-out infinite}
+.sub{border:1px solid var(--line);background:var(--white);color:var(--green);border-radius:999px;padding:17px 22px;font-weight:800;transition:transform .24s ease,border-color .24s ease}
+.add:hover,.sub:hover{transform:translateY(-2px)}
+.cert-section{padding:52px 16px;background:var(--white)}
+.cert-card{max-width:1050px;margin:0 auto;border-radius:22px;overflow:hidden;background:#111111;color:var(--white);padding:38px;position:relative;isolation:isolate;box-shadow:0 28px 80px rgba(18,51,36,.24);display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.86fr);gap:30px;align-items:end;min-height:560px}
+.cert-video{position:absolute;inset:0;z-index:-4;width:100%;height:100%;object-fit:cover;filter:none;transform:none}
+.cert-card::before,.cert-card::after{display:none}
+.cert-copy{max-width:560px;background:rgba(12,34,24,.72);border:1px solid rgba(255,255,255,.24);border-radius:20px;padding:24px;backdrop-filter:blur(14px);box-shadow:0 18px 54px rgba(6,18,12,.22)}
+.cert-bg{display:none}
+.cert-bg::before{content:'';position:absolute;inset:-60px;background:
+  radial-gradient(circle at 24% 28%,rgba(184,215,169,.28) 0 4px,transparent 5px),
+  radial-gradient(circle at 62% 18%,rgba(255,255,255,.34) 0 3px,transparent 4px),
+  radial-gradient(circle at 78% 56%,rgba(243,182,87,.24) 0 4px,transparent 5px),
+  radial-gradient(circle at 38% 72%,rgba(255,255,255,.24) 0 3px,transparent 4px),
+  linear-gradient(115deg,transparent 0 19%,rgba(255,255,255,.12) 19.2% 19.5%,transparent 19.7% 43%,rgba(184,215,169,.12) 43.2% 43.5%,transparent 43.7% 70%,rgba(255,255,255,.1) 70.2% 70.5%,transparent 70.7%),
+  linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+  background-size:100% 100%,100% 100%,100% 100%,100% 100%,100% 100%,46px 46px,46px 46px;
+  opacity:.72;animation:certDrift 16s linear infinite}
+.cert-bg span{position:absolute;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border-radius:999px;padding:8px 14px;color:rgba(255,255,255,.78);font-weight:800;letter-spacing:.08em;font-size:12px;text-transform:uppercase;box-shadow:0 12px 30px rgba(0,0,0,.12);animation:certFloat 9s ease-in-out infinite}
+.cert-bg span:nth-child(1){top:12%;right:8%;animation-delay:-1.4s}
+.cert-bg span:nth-child(2){top:34%;right:19%;animation-delay:-4.8s}
+.cert-bg span:nth-child(3){bottom:12%;right:8%;animation-delay:-2.6s}
+.cert-bg span:nth-child(4){bottom:28%;left:7%;animation-delay:-6.2s}
+.cert-bg span:nth-child(5){top:17%;left:36%;animation-delay:-3.3s}
+.outline-label,.cert-card h2,.cert-card p,.cert-links,.cert-grid,.cert-proof{position:relative;z-index:2}
+.outline-label{display:inline-flex;border:2px solid rgba(255,255,255,.9);border-radius:999px;padding:10px 22px;font-weight:800;margin-bottom:24px}
+.cert-card h2{font-size:clamp(24px,3vw,32px);line-height:1.1;letter-spacing:-.04em;font-weight:650;max-width:560px;text-wrap:balance}
+.cert-card h2 em{font-style:italic}
+.cert-card p{font-size:17px;color:rgba(255,255,255,.78);max-width:560px;margin:18px 0}
+.cert-links{border-top:1px solid rgba(255,255,255,.22);padding-top:18px;display:grid;gap:8px;margin-top:18px}
+.cert-links a{color:var(--white);font-size:16px}
+.cert-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;background:rgba(10,31,22,.58);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:10px;backdrop-filter:blur(16px);box-shadow:0 0 0 1px rgba(184,215,169,.1),0 22px 70px rgba(12,45,27,.34)}
+.cert-tile{min-height:116px;display:grid;place-items:center;text-align:center;border:1px solid rgba(210,235,196,.28);border-radius:14px;padding:14px;font-size:14px;font-weight:800;background:rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 22px rgba(184,215,169,.18);animation:certTileGlow 4.8s ease-in-out infinite}
+.cert-tile:nth-child(2){animation-delay:.35s}
+.cert-tile:nth-child(3){animation-delay:.7s}
+.cert-tile:nth-child(4){animation-delay:1.05s}
+.cert-tile:nth-child(5){animation-delay:1.4s}
+.cert-tile:nth-child(6){animation-delay:1.75s}
+.cert-tile:nth-child(even){border-right:1px solid rgba(255,255,255,.13)}
+.icon-circle{width:52px;height:52px;border:1.5px solid rgba(234,255,225,.94);border-radius:50%;display:grid;place-items:center;margin:0 auto 10px;font-weight:800;font-size:13px;background:rgba(184,215,169,.1);box-shadow:0 0 18px rgba(184,215,169,.28)}
+.results-section{padding:58px 0;background:#f4f4f4;overflow:hidden}
+.center-head{text-align:center;color:#111111;font-size:clamp(23px,3.05vw,32px);font-weight:650;letter-spacing:-.04em;line-height:1.1;margin:0 16px 28px;text-wrap:balance}
+.center-head em{font-style:italic}
+.result-scroll{display:flex;gap:18px;overflow-x:auto;padding:0 max(24px,calc((100vw - 1120px)/2)) 16px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.result-scroll::-webkit-scrollbar,.time-scroll::-webkit-scrollbar{display:none}
+.result-card{min-width:min(72vw,480px);height:540px;border-radius:14px;background:#ddd;overflow:hidden;position:relative;scroll-snap-align:center;box-shadow:0 18px 48px rgba(15,21,18,.11);transition:transform .35s ease,box-shadow .35s ease}
+.result-card:hover{transform:translateY(-5px);box-shadow:0 28px 70px rgba(15,21,18,.16)}
+.result-card img{width:100%;height:100%;object-fit:cover}
+.play{position:absolute;inset:0;display:grid;place-items:center}
+.play span{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.32);backdrop-filter:blur(10px);display:grid;place-items:center;color:var(--white);font-size:24px}
+.result-caption{position:absolute;left:0;right:0;bottom:0;background:var(--green);color:var(--white);padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;font-size:19px;font-weight:800}
+.result-caption small{display:block;font-size:16px;font-weight:500;margin-top:8px;color:rgba(255,255,255,.9)}
+.mini-add{border:none;border-radius:999px;background:var(--white);color:var(--green);font-weight:800;padding:12px 28px}
+@media(min-width:900px){
+  .results-section .center-head{margin-bottom:30px}
+  .result-scroll{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;overflow:visible;padding:0 16px 16px;justify-content:center}
+  .result-card{min-width:0;width:100%;height:500px;scroll-snap-align:none}
+}
+.brand-reviews{padding:58px 16px 70px;background:#f5f5f5;color:#111111}
+.brand-review-shell{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:.74fr 1.26fr;gap:18px;align-items:stretch}
+.review-summary{border:1px solid #d5dfd4;border-radius:18px;background:var(--white);padding:28px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 20px 58px rgba(15,21,18,.06)}
+.review-summary .eyebrow{font-size:12px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:#666666}
+.review-score{font-size:clamp(48px,6vw,72px);line-height:.9;letter-spacing:-.075em;margin:18px 0 8px}
+.review-stars{color:var(--green);font-size:22px;letter-spacing:2px;margin-bottom:10px}
+.review-summary p{font-size:17px;color:#456454;line-height:1.35;margin:0}
+.review-bars{display:grid;gap:10px;margin-top:26px}
+.review-bar{display:grid;grid-template-columns:44px 1fr 46px;gap:10px;align-items:center;font-size:13px;font-weight:800;color:#516359}
+.review-bar span:nth-child(2){height:9px;border-radius:999px;background:#e5ebe3;overflow:hidden}
+.review-bar i{display:block;height:100%;border-radius:inherit;background:var(--green)}
+.review-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.brand-review-card{border:1px solid #d5dfd4;border-radius:18px;background:var(--white);padding:22px;min-height:230px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 18px 52px rgba(15,21,18,.055);transition:transform .28s ease,box-shadow .28s ease}
+.brand-review-card:hover{transform:translateY(-4px);box-shadow:0 26px 70px rgba(15,21,18,.1)}
+.brand-review-card .review-stars{font-size:17px;margin:0 0 14px}
+.brand-review-card h3{font-size:20px;letter-spacing:-.025em;margin:0 0 10px;color:#111111}
+.brand-review-card p{font-size:15px;line-height:1.42;color:#4d5e55;margin:0}
+.review-author{margin-top:18px;font-size:14px;font-weight:850;color:#111111}
+.no-other{padding:56px 16px;background:#f4f4f4;text-align:center;color:#111111}
+.no-other h2{font-size:clamp(23px,3.25vw,34px);line-height:1.08;letter-spacing:-.044em;font-weight:650;max-width:640px;margin:0 auto;text-wrap:balance}
+.no-other h2 em{font-style:italic}
+.no-other p{font-size:21px;max-width:620px;margin:22px auto;color:#385b47}
+.stat-section{background:#f5f6f8;padding:52px 16px}
+.stat-grid{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.1fr 1.35fr;border:1px solid #cfd8d0;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 70px rgba(15,21,18,.08)}
+.stat-intro{background:#111111;color:#fff;padding:34px;display:flex;flex-direction:column;justify-content:space-between;min-height:320px;position:relative;overflow:hidden}
+.stat-intro::after{content:'';position:absolute;inset:auto -70px -100px auto;width:260px;height:260px;border:1px solid rgba(255,255,255,.16);border-radius:50%;animation:axisRotate 18s linear infinite}
+.stat-kicker{font-size:12px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.stat-intro h2{font-size:clamp(48px,6.8vw,74px);line-height:.9;letter-spacing:-.07em;margin:16px 0 14px;max-width:420px}
+.stat-intro p{font-size:18px;line-height:1.28;color:rgba(255,255,255,.82);max-width:320px}
+.stat-primary{margin-top:28px;border-top:1px solid rgba(255,255,255,.18);padding-top:22px}
+.stat-primary strong{font-size:clamp(32px,4.4vw,48px);line-height:.9;letter-spacing:-.07em}
+.stat-primary span{display:block;margin-top:8px;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.stat-list{display:grid;grid-template-columns:repeat(2,1fr);background:#ffffff}
+.stat{min-height:160px;color:#143c2a;padding:28px;border-right:1px solid #d5dfd4;border-bottom:1px solid #d5dfd4;display:flex;flex-direction:column;justify-content:space-between;transition:background .28s ease}
+.stat:nth-child(even){border-right:none}
+.stat:nth-last-child(-n+2){border-bottom:none}
+.stat:hover{background:#eef5ec}
+.stat-pill{display:block;color:#666666;font-size:11px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;margin-bottom:18px}
+.stat strong{display:block;font-size:clamp(27px,3.6vw,40px);letter-spacing:-.058em;line-height:.96;margin-bottom:8px}
+.stat p{font-size:15px;line-height:1.25;color:var(--ink);max-width:250px}
+.timeline{background:#dfe3e4;padding:58px 0;overflow:hidden}
+.time-scroll{display:flex;gap:14px;overflow-x:auto;padding:0 max(24px,calc((100vw - 1120px)/2)) 20px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.time-card{min-width:min(74vw,540px);height:610px;border-radius:12px;overflow:hidden;position:relative;scroll-snap-align:center;color:var(--white);background:#789;box-shadow:0 24px 64px rgba(15,21,18,.12);transition:transform .35s ease}
+.time-card:hover{transform:translateY(-5px)}
+.time-card img{width:100%;height:100%;object-fit:cover}
+.time-top{position:absolute;top:54px;left:0;right:0;text-align:center}
+.hour{display:inline-flex;border:2px solid rgba(255,255,255,.9);border-radius:999px;padding:8px 24px;font-weight:800;margin-bottom:38px}
+.time-top h3{font-size:clamp(20px,2.25vw,25px);line-height:1.24;font-weight:750;letter-spacing:-.022em}
+.time-text{position:absolute;left:0;right:0;bottom:0;background:var(--green);padding:26px;font-size:clamp(16px,1.75vw,19px);font-weight:600}
+.learn-section{background:#f5f5f5;padding:58px 16px;color:#111111}
+.learn-shell{max-width:1120px;margin:0 auto}
+.learn-head{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1fr);gap:28px;align-items:end;margin-bottom:24px}
+.learn-head h2{font-size:clamp(25px,3.4vw,38px);line-height:1.04;letter-spacing:-.052em;margin:0;text-wrap:balance}
+.learn-head p{font-size:17px;line-height:1.45;color:#444444;margin:0;max-width:560px}
+.learn-tabs{display:flex;gap:10px;margin:0 0 18px;overflow-x:auto;scrollbar-width:none}
+.learn-tabs::-webkit-scrollbar{display:none}
+.learn-tab{border:1px solid #cfdad0;background:#fff;color:#111111;border-radius:999px;padding:11px 22px;font-size:16px;font-weight:800;min-width:90px;transition:background .24s ease,color .24s ease,box-shadow .24s ease}
+.learn-tab.active{background:#111111;color:#fff;box-shadow:0 12px 32px rgba(21,61,42,.18)}
+.learn-panel{display:none;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:18px;align-items:stretch}
+.learn-panel.active{display:grid}
+.nad-card,.learn-copy{border:1px solid #d5dfd4;border-radius:24px;background:#fff;box-shadow:0 22px 70px rgba(15,21,18,.07);overflow:hidden}
+.nad-card{background:#f2e5d2;padding:26px;position:relative;min-height:520px;display:grid;align-items:center}
+.nad-chart-title{position:absolute;top:26px;left:32px;right:32px;text-align:center;color:#183c2a;font-weight:800;font-size:clamp(21px,2.8vw,30px);letter-spacing:-.03em}
+.nad-chart-title strong{font-size:clamp(54px,7vw,86px);line-height:.8;color:#9a9a9a;letter-spacing:-.075em}
+.nad-chart-title span{display:block}
+.nad-chart{width:100%;height:auto;margin-top:64px;filter:drop-shadow(0 12px 20px rgba(72,54,32,.08))}
+.chart-path{fill:none;stroke-width:4;stroke-linecap:round;stroke-dasharray:720;stroke-dashoffset:720;animation:drawCurve 1.5s ease forwards}
+.chart-path.nad{stroke:#1f2b2d}
+.chart-path.mito{stroke:#9ec3aa;animation-delay:.18s}
+.chart-path.cd38{stroke:#c7383c;animation-delay:.34s}
+.you-dot{transform-origin:center;animation:softFloat 5s ease-in-out infinite}
+.learn-copy{padding:32px;display:flex;flex-direction:column;justify-content:space-between}
+.learn-copy small{font-size:12px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;color:#66756c}
+.learn-copy h3{font-size:clamp(24px,2.9vw,35px);line-height:1.06;letter-spacing:-.05em;margin:16px 0;color:#111111}
+.learn-copy p{font-size:17px;line-height:1.48;color:#444444;margin:0}
+.learn-points{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px}
+.learn-point{border:1px solid #d5dfd4;border-radius:16px;background:#ffffff;padding:16px;min-height:96px}
+.learn-point b{display:block;font-size:18px;letter-spacing:-.025em;margin-bottom:6px}
+.learn-point span{font-size:13px;line-height:1.3;color:#617168}
+.benefit-lab{background:#f3f3f3;padding:56px 0 66px;color:#111111;overflow:hidden}
+.benefit-lab .center-head{margin-bottom:10px}
+.benefit-lab p{max-width:640px;margin:0 auto 28px;text-align:center;color:#444444;font-size:17px;line-height:1.45;padding:0 16px}
+.benefit-rail{display:flex;gap:14px;overflow-x:auto;padding:6px max(18px,calc((100vw - 1120px)/2)) 18px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.benefit-rail::-webkit-scrollbar{display:none}
+.benefit-chip{min-width:min(72vw,260px);height:172px;border:1px solid #d5dfd4;border-radius:20px;background:#fff;padding:22px;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 18px 54px rgba(15,21,18,.065);position:relative;overflow:hidden;animation:benefitHover 7s ease-in-out infinite}
+.benefit-chip:nth-child(2n){animation-delay:-1.4s}
+.benefit-chip:nth-child(3n){animation-delay:-2.8s}
+.benefit-chip::after{content:'';position:absolute;right:-34px;bottom:-34px;width:96px;height:96px;border-radius:50%;border:1px solid rgba(21,61,42,.14)}
+.benefit-chip small{font-size:12px;font-weight:850;letter-spacing:.14em;color:#666666}
+.benefit-chip b{font-size:20px;line-height:1.05;letter-spacing:-.04em;max-width:190px}
+.benefit-cta{display:flex;justify-content:center;margin-top:8px}
+.benefit-cta a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;background:#111111;color:#fff;text-decoration:none;font-weight:850;padding:0 24px;box-shadow:0 16px 44px rgba(21,61,42,.16)}
+.sticky-buy{position:fixed;left:50%;bottom:16px;transform:translateX(-50%) translateY(120%);z-index:80;width:min(700px,calc(100% - 24px));background:rgba(246,250,246,.7);border:1px solid rgba(255,255,255,.72);box-shadow:0 22px 58px rgba(15,21,18,.24);backdrop-filter:blur(26px) saturate(1.18);border-radius:26px;padding:10px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;transition:transform .34s ease}
+.sticky-buy.show{transform:translateX(-50%) translateY(0)}
+.sticky-thumb{width:54px;height:54px;border-radius:16px;background:linear-gradient(145deg,#eaf2e8,#fff);display:grid;place-items:center;overflow:hidden;border:1px solid rgba(47,91,66,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.sticky-thumb img{height:56px;width:auto;filter:drop-shadow(0 8px 10px rgba(15,21,18,.16))}
+.sticky-copy{min-width:0}
+.sticky-copy b{display:block;color:var(--green);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sticky-copy span{font-size:12px;color:var(--muted)}
+.sticky-buy button{border:none;border-radius:18px;background:rgba(47,91,66,.95);color:var(--white);font-weight:800;padding:15px 24px;box-shadow:0 10px 26px rgba(47,91,66,.22);min-width:132px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes preloadSpin{to{transform:rotate(360deg)}}
+@keyframes axisRotate{from{transform:rotate(18deg)}to{transform:rotate(378deg)}}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes tabPulse{0%,100%{transform:scaleX(.22);opacity:.58}50%{transform:scaleX(1);opacity:1}}
+@keyframes softShine{0%,30%{transform:translateX(-110%)}52%,100%{transform:translateX(110%)}}
+@keyframes buttonShine{0%,38%{transform:translateX(-110%)}58%,100%{transform:translateX(110%)}}
+@keyframes certBg{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.1) translate3d(-12px,8px,0)}}
+@keyframes certDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-46px,-46px,0)}}
+@keyframes certFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes certTileGlow{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 18px rgba(184,215,169,.14)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 34px rgba(184,215,169,.34)}}
+@keyframes drawCurve{to{stroke-dashoffset:0}}
+@keyframes softFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes benefitHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+.reveal-stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+.reveal-stagger.in-view>*{opacity:1;transform:translateY(0)}
+.reveal-stagger.in-view>*:nth-child(2){transition-delay:.07s}
+.reveal-stagger.in-view>*:nth-child(3){transition-delay:.14s}
+.reveal-stagger.in-view>*:nth-child(4){transition-delay:.21s}
+.reveal-stagger.in-view>*:nth-child(5){transition-delay:.28s}
+.reveal-stagger.in-view>*:nth-child(6){transition-delay:.35s}
+@media(max-width:760px){
+  .nav-inner{height:102px}
+  .brand{font-size:26px}
+  .search-pill{height:56px;font-size:18px;min-width:46vw}
+  .hero-frame{padding-top:14px}
+  .hero-art{min-height:410px}
+  .hero-art::before{width:240px;height:298px}
+  .hero-product{width:257px}
+  .hero-layer{width:min(92vw,560px);max-height:365px}
+  .hero-composite{width:94vw;min-height:350px}
+  .hero-glass-copy{padding:20px;max-width:300px}
+  .hero-person{width:min(38vw,230px)}
+  .bio-product{width:min(36vw,230px)}
+  .benefit-tabs{grid-template-columns:repeat(4,1fr);margin-inline:22px;overflow:hidden}
+  .benefit-tabs::-webkit-scrollbar{display:none}
+  .benefit-card{min-height:72px;padding:12px 8px}
+  .benefit-card b{font-size:13px;line-height:1.1}
+  .product-inner{grid-template-columns:1fr;padding:22px;gap:22px}
+  .product-copy{min-height:0;gap:22px}
+  .product-title{font-size:26px}
+  .rating-row{grid-template-columns:1fr 1fr}
+  .rating-row .rank,.rating-row .rating-proof{min-height:132px;padding:18px}
+  .rank strong{font-size:36px}
+  .size-grid{grid-template-columns:1fr}
+  .buy-actions{grid-template-columns:1fr}
+  .cert-card{padding:28px;border-radius:18px;grid-template-columns:1fr;gap:22px;min-height:620px;align-items:end}
+  .cert-card::before{background:linear-gradient(180deg,rgba(7,18,13,.72) 0%,rgba(7,18,13,.92) 48%,rgba(14,37,27,.96) 100%)}
+  .cert-card p{font-size:16px}
+  .cert-grid{grid-template-columns:1fr 1fr}
+  .cert-bg span:nth-child(2),.cert-bg span:nth-child(5){display:none}
+  .result-scroll{padding-inline:24px}
+  .result-card{min-width:82vw;height:520px}
+  .brand-review-shell{grid-template-columns:1fr}
+  .review-cards{grid-template-columns:1fr 1fr}
+  .learn-head{grid-template-columns:1fr;gap:12px}
+  .learn-panel,.learn-panel.active{grid-template-columns:1fr}
+  .nad-card{min-height:460px;padding:20px}
+  .learn-copy{padding:24px}
+  .stat-grid{grid-template-columns:1fr}
+  .stat-intro{min-height:300px;padding:28px}
+  .stat-list{grid-template-columns:1fr 1fr}
+  .stat{padding:22px;min-height:148px}
+  .stat p{font-size:14px}
+  .time-scroll{padding-inline:24px}
+  .time-card{min-width:82vw;height:560px}
+  .sticky-buy{border-radius:20px;grid-template-columns:auto 1fr;padding:9px}
+  .sticky-thumb{width:48px;height:48px;border-radius:14px}
+  .sticky-thumb img{height:50px}
+  .sticky-buy button{grid-column:1 / -1;width:100%;padding:14px 18px}
+}
+@media(max-width:520px){
+  .nav-inner{height:86px}
+  .brand{font-size:23px}
+  .search-pill{height:50px;font-size:16px;padding:0 14px}
+  .hero-frame h1{font-size:23px}
+  .hero-frame h1 .hero-kicker{font-size:10px;margin-bottom:8px}
+  .hero-art{min-height:390px}
+  .hero-art::before{width:208px;height:259px}
+  .hero-product{width:228px}
+  .hero-layer{width:112vw;max-height:350px}
+  .hero-slide:nth-child(2) .hero-layer{width:108vw}
+  .hero-slide:nth-child(3) .hero-layer{width:114vw}
+  .hero-composite{width:100%;min-height:350px}
+  .hero-testimonial{grid-template-columns:.92fr .72fr;gap:4px}
+  .hero-glass-copy{padding:14px;border-radius:18px;max-width:190px}
+  .hero-glass-copy b{font-size:20px;margin-bottom:10px}
+  .hero-glass-copy p{font-size:13px}
+  .hero-stars{font-size:13px;margin-top:10px}
+  .hero-person{width:168px;max-height:278px}
+  .hero-biology{grid-template-columns:.8fr .82fr;gap:4px}
+  .bio-title{top:4px;font-size:18px}
+  .bio-copy{padding:13px;border-radius:16px;margin-top:34px}
+  .bio-copy h3,.bio-nmn h3{font-size:28px}
+  .bio-copy p,.bio-nmn p{font-size:12px}
+  .bio-copy ul{gap:8px}
+  .bio-product{width:156px;grid-row:1 / span 2;grid-column:2;margin-top:38px}
+  .bio-nmn{grid-column:1 / -1;justify-self:center;padding:12px 20px;border-radius:16px}
+  .benefit-tabs{margin-inline:0;grid-template-columns:repeat(4,1fr)}
+  .benefit-card{min-height:66px;padding:10px 6px}
+  .benefit-card b{font-size:12px;line-height:1.08}
+  .product-info{padding:22px 12px 30px}
+  .product-inner{padding:18px;border-radius:18px}
+  .product-title{font-size:22px}
+  .tag{font-size:12px;padding:7px 12px}
+  .rating-row{gap:0}
+  .rating-row .rank,.rating-row .rating-proof{padding:16px;min-height:124px}
+  .rank strong{font-size:31px}
+  .stars{font-size:18px}
+  .size-row b{font-size:19px}
+  .size-grid{grid-template-columns:repeat(3,1fr);gap:7px}
+  .size-card{padding:12px 6px;border-radius:12px}
+  .size-card b{font-size:18px}
+  .size-card small{font-size:12px}
+  .cert-card{padding:22px;min-height:640px}
+  .cert-card h2{font-size:22px}
+  .cert-links a{font-size:14px}
+  .cert-tile{min-height:104px;font-size:12px}
+  .icon-circle{width:46px;height:46px}
+  .center-head{font-size:24px}
+  .result-card{height:480px}
+  .result-caption{padding:20px;grid-template-columns:1fr;font-size:18px}
+  .mini-add{justify-self:start}
+  .brand-reviews{padding:42px 16px 64px}
+  .review-summary{padding:22px}
+  .review-cards{grid-template-columns:1fr}
+  .brand-review-card{min-height:190px}
+  .learn-section{padding:42px 12px}
+  .learn-tab{min-width:76px;padding:10px 18px}
+  .nad-card{min-height:390px;border-radius:18px}
+  .nad-chart-title{top:18px;left:18px;right:18px}
+  .nad-chart{margin-top:52px}
+  .learn-copy{border-radius:18px;padding:22px}
+  .learn-points{grid-template-columns:1fr}
+  .benefit-lab{padding:42px 0 58px}
+  .benefit-chip{min-width:76vw;height:154px}
+  .time-card{height:520px}
+  .time-top h3{font-size:21px}
+  .time-text{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .reveal,.reveal-stagger>*{opacity:1!important;transform:none!important}
+  .hero-slide{opacity:0!important;transform:none!important}
+  .hero-slide.active{opacity:1!important}
+}
+.preloader,.hero-frame,.product-info,.results-section,.brand-reviews,.learn-section,.benefit-lab,.no-other{background:#f3f3f3!important;color:#111!important}
+.nav,.product-inner,.rating-row,.tag,.size-card,.cert-copy,.cert-grid,.cert-tile,.review-summary,.brand-review-card,.stat-grid,.learn-copy,.learn-point,.benefit-chip{border-color:#d2d2d2!important;background:#fff!important;color:#111!important}
+.tag.fill,.add,.result-caption,.stat-intro,.time-text,.learn-tab.active,.benefit-cta a,.sticky-buy button{background:#111!important;border-color:#111!important;color:#fff!important;box-shadow:0 16px 44px rgba(0,0,0,.14)!important}
+.hero-art::before{background:linear-gradient(145deg,#151515 0%,#555 58%,#9a9a9a 100%)!important;box-shadow:0 34px 76px rgba(0,0,0,.16)!important}
+.hero-art::after{background:radial-gradient(closest-side,rgba(0,0,0,.14),transparent 70%)!important}
+.hero-frame h1 em,.hero-frame h1 .hero-kicker,.brand,.stars,.review-stars,.hero-stars,.rating-score,.rating-link,.product-title,.center-head,.brand-reviews,.review-author,.learn-copy h3,.benefit-chip b,.sticky-copy b{color:#111!important}
+.hero-frame h1 .hero-subline,.review-summary p,.brand-review-card p,.learn-head p,.learn-copy p,.benefit-lab p,.stat p,.bio-copy p,.bio-nmn p{color:#444!important}
+.marquee{background:#e8e8e8!important;border-color:#d0d0d0!important;color:#111!important}
+.hero-glass-copy,.bio-copy,.bio-nmn{background:rgba(255,255,255,.7)!important;border-color:rgba(255,255,255,.9)!important;box-shadow:0 18px 54px rgba(0,0,0,.1)!important}
+.nad-card{background:#e6e6e6!important}
+.nad-chart-title strong{color:#777!important}
+.chart-path.nad{stroke:#111!important}
+.chart-path.mito{stroke:#8b8b8b!important}
+.chart-path.cd38{stroke:#555!important}
+.bio-title,.bio-copy h3,.bio-nmn h3,.rank strong,.review-score,.stat strong{color:#111!important}
+.size-card.active{border-color:#111!important;box-shadow:0 0 0 4px rgba(0,0,0,.1)!important}
+.sticky-buy{background:rgba(245,245,245,.76)!important;box-shadow:0 22px 58px rgba(0,0,0,.18)!important}
+.cert-card{background:#111!important;box-shadow:0 28px 80px rgba(0,0,0,.24)!important}
+.icon-circle{background:rgba(255,255,255,.08)!important;box-shadow:0 0 18px rgba(255,255,255,.16)!important}
+.play span{background:rgba(255,255,255,.38)!important}
+.hero-product,.bio-product,.hero-person,.sticky-thumb img,.result-card img,.cert-video{filter:grayscale(1)!important}
+.hero-product{filter:grayscale(1) drop-shadow(0 30px 34px rgba(0,0,0,.22))!important}
+.bio-product{filter:grayscale(1) drop-shadow(0 26px 32px rgba(0,0,0,.2))!important}
+.hero-person{filter:grayscale(1) drop-shadow(0 24px 34px rgba(0,0,0,.15))!important}
+</style>
+</head>
+<body>
+<div class="preloader" id="preloader" aria-label="Loading GATACA page">
+  <div class="preloader-mark"><span>GATACA</span></div>
+</div>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#">GATACA</a>
+    <div class="search-pill"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Search for NMN 500</span></div>
+  </div>
+</nav>
+
+<main>
+  <section class="hero-frame" id="buy">
+    <h1><span class="hero-kicker">Pure beta-NMN 500mg</span>Cellular energy, <em>recovery</em><span class="hero-subline">and healthy ageing support.</span></h1>
+    <div class="hero-art">
+      <div class="hero-slide active"><img class="hero-product" src="gataca-nmn-500-cutout.png" alt="GATACA Pure beta-NMN 500 mg"></div>
+      <div class="hero-slide">
+        <div class="hero-composite hero-testimonial">
+          <div class="hero-glass-copy">
+            <b>Samantha Ruth Prabhu</b>
+            <p>It's like my body is performing at its best on every level.<strong>I love it.</strong></p>
+            <span class="hero-stars">★★★★★</span>
+          </div>
+          <img class="hero-person" src="gataca-hero-samantha-person.png" alt="Samantha Ruth Prabhu">
+        </div>
+      </div>
+      <div class="hero-slide">
+        <div class="hero-composite hero-biology">
+          <div class="bio-title">THE BIOLOGY</div>
+          <div class="bio-copy">
+            <h3>NAD+</h3>
+            <ul>
+              <li><p>Essential coenzyme in every cell</p></li>
+              <li><p>Drives cellular energy</p></li>
+              <li><p>Supports mitochondria & sirtuins</p></li>
+            </ul>
+          </div>
+          <img class="bio-product" src="gataca-nmn-500-cutout.png" alt="GATACA NMN bottle biology">
+          <div class="bio-nmn"><h3>NMN</h3><p>Direct precursor<br>to NAD+</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-tabs">
+      <div class="benefit-card active"><b>Enhances endurance*</b></div>
+      <div class="benefit-card"><b>Supports focus*</b></div>
+      <div class="benefit-card"><b>Supports DNA repair*</b></div>
+      <div class="benefit-card"><b>Promotes longevity*</b></div>
+    </div>
+    <p class="fineprint">*Supplement claims are not intended to diagnose, treat, cure or prevent disease.</p>
+  </section>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>59 SATISFIED CUSTOMERS</span><span>•</span><span>4.8 POSITIVE RATING</span><span>•</span><span>21 PATENT-BACKED INGREDIENT CLAIMS</span><span>•</span>
+      <span>59 SATISFIED CUSTOMERS</span><span>•</span><span>4.8 POSITIVE RATING</span><span>•</span><span>21 PATENT-BACKED INGREDIENT CLAIMS</span><span>•</span>
+    </div>
+  </div>
+
+  <section class="product-info">
+    <div class="product-inner">
+      <div class="product-copy">
+        <div>
+          <div class="tags"><span class="tag">THIRD-PARTY TESTED</span><span class="tag fill">BESTSELLER</span></div>
+          <h2 class="product-title">Pure beta-NMN | Nicotinamide Mononucleotide | 500mg</h2>
+        </div>
+        <div class="rating-row">
+          <div class="rank"><strong>#1</strong><span>Doctor recommended<br>NMN ritual*</span></div>
+          <div class="rating-proof"><div><div class="stars">★★★★☆</div><div class="rating-score">4.8 | <a class="rating-link" href="#reviews">59 reviews</a></div></div><span class="rating-label">Customer confidence</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="size-row">
+          <b>Size: 500mg</b>
+          <div class="size-grid">
+            <button class="size-card active" data-price="Rs. 1,599"><b>1 Pack</b><small>30 capsules</small></button>
+            <button class="size-card" data-price="Rs. 2,999"><b>2 Pack</b><small>Save more</small></button>
+            <button class="size-card" data-price="Rs. 4,299"><b>3 Pack</b><small>Best routine</small></button>
+          </div>
+        </div>
+        <div class="buy-actions"><button class="add" id="addBtn">Add to cart • Rs. 1,599</button><button class="sub">Subscribe & save</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cert-section">
+    <div class="cert-card">
+      <video class="cert-video" autoplay muted loop playsinline preload="metadata" poster="https://assets.mixkit.co/videos/4733/4733-thumb-720-0.jpg">
+        <source src="gataca-lab-verification.mp4" type="video/mp4">
+      </video>
+      <div class="cert-bg" aria-hidden="true">
+        <span>NAD+</span>
+        <span>COA</span>
+        <span>99% Pure</span>
+        <span>Batch tested</span>
+        <span>NMN</span>
+      </div>
+      <div class="cert-copy">
+        <div class="outline-label">CERTIFICATIONS</div>
+        <h2>Your NMN Is Third-Party Tested & <em>Verified</em></h2>
+        <p>Batch-level confidence, purity checks and third-party validation in one calm proof frame.</p>
+        <div class="cert-links">
+          <a href="#">View batch test results →</a>
+          <a href="#">View third-party verification reports →</a>
+        </div>
+      </div>
+      <div class="cert-proof">
+        <div class="cert-grid">
+          <div class="cert-tile"><div><div class="icon-circle">ISO</div>ISO CERTIFIED</div></div>
+          <div class="cert-tile"><div><div class="icon-circle">GMP</div>GMP CERTIFIED</div></div>
+          <div class="cert-tile"><div><div class="icon-circle">LAB</div>CLINICALLY TESTED</div></div>
+          <div class="cert-tile"><div><div class="icon-circle">NMN</div>PURITY FOCUSED NMN</div></div>
+          <div class="cert-tile"><div><div class="icon-circle">V</div>VEGAN CAPSULES</div></div>
+          <div class="cert-tile"><div><div class="icon-circle">✓</div>THIRD-PARTY VERIFIED</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="no-other">
+    <h2>No Other Supplement Does What NMN <em>Does</em></h2>
+    <p>GATACA Pure beta-NMN supports NAD+ production, cellular energy and recovery routines.</p>
+  </section>
+
+  <section class="stat-section">
+    <div class="stat-grid">
+      <div class="stat-intro">
+        <div>
+          <div class="stat-kicker">NAD+ BOOST</div>
+          <h2><span class="count-up" data-count="500" data-suffix="mg">0mg</span></h2>
+          <p>daily beta-NMN capsule ritual</p>
+        </div>
+        <div class="stat-primary">
+          <strong>β-NMN</strong>
+          <span>cellular energy support</span>
+        </div>
+      </div>
+      <div class="stat-list">
+        <div class="stat"><span class="stat-pill">PERFORMANCE</span><strong><span class="count-up" data-count="4.8" data-decimals="1">0.0</span></strong><p>average customer rating</p></div>
+        <div class="stat"><span class="stat-pill">QUALITY</span><strong><span class="count-up" data-count="99" data-suffix="%">0%</span></strong><p>third-party verified purity</p></div>
+        <div class="stat"><span class="stat-pill">ROUTINE</span><strong><span class="count-up" data-count="30">0</span></strong><p>vegan capsules per bottle</p></div>
+        <div class="stat"><span class="stat-pill">TRUST</span><strong><span class="count-up" data-count="59">0</span></strong><p>product reviews surfaced</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <h2 class="center-head">Witness The Power Of Longevity With <em>Consistency</em></h2>
+    <div class="time-scroll">
+      <article class="time-card"><img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=80" alt=""><div class="time-top"><div class="hour">HOUR 8</div><h3>NAD+ PATHWAYS<br>ARE ACTIVATED</h3></div><div class="time-text">NMN enters cells and supports NAD+ production for cellular energy and repair.</div></article>
+      <article class="time-card"><img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=1000&q=80" alt=""><div class="time-top"><div class="hour">DAY 14</div><h3>ENERGY ROUTINES<br>FEEL STEADIER</h3></div><div class="time-text">Consistency helps shoppers connect the product to daily performance habits.</div></article>
+      <article class="time-card"><img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1000&q=80" alt=""><div class="time-top"><div class="hour">DAY 60</div><h3>LONGEVITY<br>COMPOUNDS</h3></div><div class="time-text">The strongest CRO path is bundle consistency, not one-off trial behavior.</div></article>
+    </div>
+  </section>
+
+  <section class="learn-section" id="nmn-guide">
+    <div class="learn-shell">
+      <div class="learn-head">
+        <h2>Must read before you take Pure β-NMN.</h2>
+        <p>Adapted from GATACA's original Why, What, Who and When education flow, rebuilt as a cleaner interactive guide.</p>
+      </div>
+      <div class="learn-tabs" role="tablist" aria-label="NMN education">
+        <button class="learn-tab active" type="button" data-tab="why">Why</button>
+        <button class="learn-tab" type="button" data-tab="what">What</button>
+        <button class="learn-tab" type="button" data-tab="who">Who</button>
+        <button class="learn-tab" type="button" data-tab="when">When</button>
+      </div>
+      <div class="learn-panel active" data-panel="why">
+        <div class="nad-card">
+          <div class="nad-chart-title"><strong>65%</strong><span>Decline in NAD+ from ages 30-70</span></div>
+          <svg class="nad-chart" viewBox="0 0 720 520" role="img" aria-label="NAD+ levels decline with age while CD38 levels rise">
+            <defs><radialGradient id="nadGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#8f8f8f" stop-opacity=".9"/><stop offset="1" stop-color="#bdbdbd" stop-opacity=".72"/></radialGradient></defs>
+            <path d="M82 74v365h574" fill="none" stroke="#313131" stroke-width="4"/><path d="M82 74l-8 14M82 74l8 14M656 439l-14-8M656 439l-14 8" fill="none" stroke="#313131" stroke-width="4"/>
+            <text x="42" y="285" transform="rotate(-90 42 285)" font-size="24" font-weight="800" fill="#303030">Activity Levels</text><text x="606" y="474" font-size="24" font-weight="800" fill="#303030">Age</text>
+            <text x="174" y="470" font-size="22" fill="#444">20</text><text x="320" y="470" font-size="22" fill="#444">40</text><text x="470" y="470" font-size="22" fill="#444">60</text><text x="615" y="470" font-size="22" fill="#444">80</text>
+            <circle class="you-dot" cx="390" cy="305" r="138" fill="url(#nadGlow)" opacity=".92"/><text x="329" y="305" font-size="22" fill="#252525">You Are Here</text>
+            <path class="chart-path nad" d="M135 176 C226 342, 355 388, 586 404"/><path class="chart-path mito" d="M121 158 C206 314, 344 379, 548 398"/><path class="chart-path cd38" d="M115 405 C303 408, 503 356, 606 178"/>
+            <text x="114" y="230" font-size="22" font-weight="800" fill="#252525" transform="rotate(62 114 230)">NAD+ Levels</text>
+            <text x="231" y="208" font-size="21" fill="#252525">Mitochondrial<tspan x="231" dy="24">Function & Sirtuin Activation</tspan></text>
+            <text x="566" y="204" font-size="20" fill="#252525" transform="rotate(-74 566 204)">CD38 Levels</text>
+          </svg>
+        </div>
+        <div class="learn-copy">
+          <div><small>Why it matters</small><h3>NAD+, the super molecule.</h3><p>NAD+ supports cellular energy and sirtuin activity. GATACA frames NMN as a daily precursor ritual because NAD+ naturally declines with age.</p></div>
+          <div class="learn-points"><div class="learn-point"><b>Cell energy</b><span>Supports the pathways behind everyday stamina.</span></div><div class="learn-point"><b>Age-aware</b><span>Designed for consistency as NAD+ levels taper over time.</span></div></div>
+        </div>
+      </div>
+      <div class="learn-panel" data-panel="what">
+        <div class="nad-card">
+          <div class="nad-chart-title"><strong>β</strong><span>Beta-NMN as a daily NAD+ precursor</span></div>
+          <svg class="nad-chart" viewBox="0 0 720 520" aria-hidden="true"><circle cx="360" cy="260" r="170" fill="#e8e8e8"/><circle cx="360" cy="260" r="112" fill="#111111"/><text x="286" y="250" font-size="54" font-weight="850" fill="#fff">NMN</text><text x="240" y="305" font-size="25" fill="#fff">NAD+ precursor</text><path class="chart-path mito" d="M120 390 C230 200, 460 210, 600 130"/><path class="chart-path cd38" d="M110 130 C250 300, 470 320, 610 390"/></svg>
+        </div>
+        <div class="learn-copy">
+          <div><small>What it is</small><h3>Pure β-NMN 500mg in a capsule ritual.</h3><p>NMN is positioned as a clean nutraceutical input for NAD+ production, cellular repair pathways and daily energy routines.</p></div>
+          <div class="learn-points"><div class="learn-point"><b>500mg</b><span>One focused daily dose.</span></div><div class="learn-point"><b>Vegan</b><span>30 vegetarian capsules per bottle.</span></div></div>
+        </div>
+      </div>
+      <div class="learn-panel" data-panel="who">
+        <div class="nad-card">
+          <div class="nad-chart-title"><strong>30+</strong><span>Built for proactive ageing support</span></div>
+          <svg class="nad-chart" viewBox="0 0 720 520" aria-hidden="true"><rect x="104" y="128" width="512" height="264" rx="34" fill="#fff" opacity=".62"/><circle cx="224" cy="260" r="72" fill="#111111"/><circle cx="360" cy="260" r="72" fill="#5f5f5f"/><circle cx="496" cy="260" r="72" fill="#9a9a9a"/><text x="190" y="268" font-size="22" fill="#fff" font-weight="800">Focus</text><text x="320" y="268" font-size="22" fill="#fff" font-weight="800">Energy</text><text x="456" y="268" font-size="22" fill="#111111" font-weight="800">Repair</text></svg>
+        </div>
+        <div class="learn-copy">
+          <div><small>Who it is for</small><h3>For energy, recovery and longevity-minded adults.</h3><p>The original GATACA page points toward people noticing fatigue, low output, slower recovery or a desire to build a more consistent wellness ritual.</p></div>
+          <div class="learn-points"><div class="learn-point"><b>Busy adults</b><span>For steadier output across the day.</span></div><div class="learn-point"><b>Active routines</b><span>For recovery and endurance support.</span></div></div>
+        </div>
+      </div>
+      <div class="learn-panel" data-panel="when">
+        <div class="nad-card">
+          <div class="nad-chart-title"><strong>AM</strong><span>Make it part of the daily ritual</span></div>
+          <svg class="nad-chart" viewBox="0 0 720 520" aria-hidden="true"><circle cx="360" cy="242" r="112" fill="#9a9a9a"/><path d="M360 64v58M360 362v58M182 242h58M480 242h58M234 116l42 42M444 326l42 42M486 116l-42 42M276 326l-42 42" stroke="#111111" stroke-width="16" stroke-linecap="round"/><rect x="205" y="382" width="310" height="62" rx="31" fill="#111111"/><text x="250" y="422" font-size="25" fill="#fff" font-weight="800">Daily consistency</text></svg>
+        </div>
+        <div class="learn-copy">
+          <div><small>When to take</small><h3>Keep it simple and repeatable.</h3><p>Make NMN part of a morning routine or a consistent daily slot. The CRO point is clarity: fewer decisions, better adherence.</p></div>
+          <div class="learn-points"><div class="learn-point"><b>Daily</b><span>Consistency beats occasional use.</span></div><div class="learn-point"><b>With routine</b><span>Pair with breakfast, training or a wellness stack.</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="benefit-lab">
+    <h2 class="center-head">What Pure β-NMN Helps <em>Support</em></h2>
+    <p>Condensed from GATACA's benefit language into a lighter scan-friendly rail.</p>
+    <div class="benefit-rail">
+      <article class="benefit-chip"><small>01</small><b>Boosts energy</b></article>
+      <article class="benefit-chip"><small>02</small><b>Improves endurance</b></article>
+      <article class="benefit-chip"><small>03</small><b>Slows down ageing</b></article>
+      <article class="benefit-chip"><small>04</small><b>Supports muscle recovery</b></article>
+      <article class="benefit-chip"><small>05</small><b>Enhances focus</b></article>
+      <article class="benefit-chip"><small>06</small><b>Promotes heart health</b></article>
+      <article class="benefit-chip"><small>07</small><b>Improves insulin sensitivity</b></article>
+      <article class="benefit-chip"><small>08</small><b>Strengthens immunity</b></article>
+      <article class="benefit-chip"><small>09</small><b>Supports skin vitality</b></article>
+    </div>
+    <div class="benefit-cta"><a href="#buy">Build my NMN ritual</a></div>
+  </section>
+
+  <section class="results-section" id="reviews">
+    <h2 class="center-head">Real People, Real <em>Results</em></h2>
+    <div class="result-scroll">
+      <article class="result-card"><img src="samantha-ruth-prabhu.jpg" alt="Samantha Ruth Prabhu"><div class="play"><span>▶</span></div><div class="result-caption"><div>★ 4.8<small>Samantha Ruth Prabhu, Gataca co-founder.</small></div><button class="mini-add">ADD</button></div></article>
+      <article class="result-card"><img src="gataca-result-training.jpg" alt="GATACA customer training result"><div class="play"><span>▶</span></div><div class="result-caption"><div>★ 4.8<small>Sharper training days and better recovery.</small></div><button class="mini-add">ADD</button></div></article>
+      <article class="result-card"><img src="gataca-result-focus.jpg" alt="GATACA customer focus result"><div class="play"><span>▶</span></div><div class="result-caption"><div>★ 4.8<small>Better focus without the afternoon crash.</small></div><button class="mini-add">ADD</button></div></article>
+    </div>
+  </section>
+
+  <section class="brand-reviews" aria-label="Customer reviews from the original GATACA product page">
+    <div class="brand-review-shell">
+      <aside class="review-summary">
+        <div>
+          <div class="eyebrow">Customer Reviews</div>
+          <div class="review-score">4.90</div>
+          <div class="review-stars">★★★★★</div>
+          <p>Based on 59 reviews from the original GATACA product page.</p>
+        </div>
+        <div class="review-bars" aria-label="Review distribution">
+          <div class="review-bar"><span>5★</span><span><i style="width:90%"></i></span><span>53</span></div>
+          <div class="review-bar"><span>4★</span><span><i style="width:10%"></i></span><span>6</span></div>
+        </div>
+      </aside>
+      <div class="review-cards">
+        <article class="brand-review-card"><div><div class="review-stars">★★★★★</div><h3>Gataca to my rescue!!</h3><p>Six months in, Sadia notes better energy, skin texture and stronger nails.</p></div><div class="review-author">Sadia</div></article>
+        <article class="brand-review-card"><div><div class="review-stars">★★★★★</div><h3>Amazing Results</h3><p>GG calls out more energy, better focus and less brain fog.</p></div><div class="review-author">GG</div></article>
+        <article class="brand-review-card"><div><div class="review-stars">★★★★★</div><h3>It does what it says!</h3><p>Shaonli says afternoon dips eased and workouts started feeling better.</p></div><div class="review-author">Shaonli</div></article>
+        <article class="brand-review-card"><div><div class="review-stars">★★★★★</div><h3>Feel energised</h3><p>Raghav started noticing changes in daily activity after use.</p></div><div class="review-author">Raghav</div></article>
+        <article class="brand-review-card"><div><div class="review-stars">★★★★★</div><h3>Good product</h3><p>Arya describes it as a simple energy booster.</p></div><div class="review-author">Arya krishnady</div></article>
+        <article class="brand-review-card"><div><div class="review-stars">★★★★☆</div><h3>Review mix</h3><p>Most reviews are five-star, with a small four-star band for balanced trust.</p></div><div class="review-author">Verified customers</div></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="sticky-buy" id="stickyBuy">
+  <div class="sticky-thumb"><img src="gataca-nmn-500-cutout.png" alt=""></div>
+  <div class="sticky-copy"><b>Pure beta-NMN 500mg</b><span id="stickyPrice">Rs. 1,599 • third-party tested</span></div>
+  <button>Buy now</button>
+</div>
+
+<script>
+const preloader=document.getElementById('preloader');
+window.addEventListener('load',()=>setTimeout(()=>preloader?.classList.add('hide'),450));
+setTimeout(()=>preloader?.classList.add('hide'),2200);
+const heroSlides=[...document.querySelectorAll('.hero-slide')];
+let heroSlideIndex=0;
+if(heroSlides.length>1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  setInterval(()=>{
+    heroSlides[heroSlideIndex].classList.remove('active');
+    heroSlideIndex=(heroSlideIndex+1)%heroSlides.length;
+    heroSlides[heroSlideIndex].classList.add('active');
+  },5000);
+}
+document.querySelectorAll('.size-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.size-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    addBtn.textContent='Add to cart • '+card.dataset.price;
+    stickyPrice.textContent=card.dataset.price+' • third-party tested';
+  });
+});
+const sticky=document.getElementById('stickyBuy');
+window.addEventListener('scroll',()=>sticky.classList.toggle('show',window.scrollY>520),{passive:true});
+document.querySelectorAll('.learn-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const target=tab.dataset.tab;
+    document.querySelectorAll('.learn-tab').forEach(item=>item.classList.toggle('active',item===tab));
+    document.querySelectorAll('.learn-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.panel===target));
+  });
+});
+const revealTargets=[
+  '.hero-frame h1','.hero-art','.benefit-tabs','.product-info','.cert-card',
+  '.results-section .center-head','.learn-head','.learn-tabs','.benefit-lab .center-head','.no-other','.stat-grid','.timeline .center-head'
+];
+document.querySelectorAll(revealTargets.join(',')).forEach(el=>el.classList.add('reveal'));
+document.querySelectorAll('.benefit-tabs,.cert-grid,.result-scroll,.benefit-rail,.stat-grid,.time-scroll').forEach(el=>el.classList.add('reveal-stagger'));
+const revealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+},{threshold:.05,rootMargin:'0px 0px 22% 0px'});
+document.querySelectorAll('.reveal,.reveal-stagger').forEach(el=>revealObserver.observe(el));
+const countEls=document.querySelectorAll('.count-up');
+const runCount=el=>{
+  const target=parseFloat(el.dataset.count || '0');
+  const decimals=parseInt(el.dataset.decimals || '0',10);
+  const suffix=el.dataset.suffix || '';
+  const start=performance.now();
+  const duration=1200;
+  const ease=t=>1-Math.pow(1-t,3);
+  const tick=now=>{
+    const progress=Math.min((now-start)/duration,1);
+    const value=target*ease(progress);
+    el.textContent=value.toFixed(decimals)+suffix;
+    if(progress<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+};
+const countObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.querySelectorAll('.count-up').forEach(runCount);
+      countObserver.unobserve(entry.target);
+    }
+  });
+},{threshold:.28});
+const statPanel=document.querySelector('.stat-grid');
+if(statPanel) countObserver.observe(statPanel);
+</script>
+</body>
+</html>
