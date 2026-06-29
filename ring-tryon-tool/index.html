@@ -114,7 +114,19 @@
       display: none;
       z-index: 4;
       overflow: hidden;
-      clip-path: inset(42% 1% 20% 1% round 8px);
+      clip-path: polygon(
+        0% 32%,
+        29% 32%,
+        38% 23%,
+        45% 16%,
+        50% 12%,
+        55% 16%,
+        62% 23%,
+        71% 32%,
+        100% 32%,
+        100% 82%,
+        0% 82%
+      );
     }
 
     .ring:active { cursor: grabbing; }
@@ -418,7 +430,19 @@
     let stream = null;
     let activeImageSrc = '';
     const defaultRing = { x: 50, y: 76, size: 90, rotation: -8 };
-    const crop = { top: .42, bottom: .20 };
+    const ringMask = [
+      [0, .32],
+      [.29, .32],
+      [.38, .23],
+      [.45, .16],
+      [.50, .12],
+      [.55, .16],
+      [.62, .23],
+      [.71, .32],
+      [1, .32],
+      [1, .82],
+      [0, .82]
+    ];
     let ringState = { ...defaultRing };
     let drag = null;
 
@@ -606,21 +630,16 @@
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(ringState.rotation * Math.PI / 180);
-      const sourceY = crop.top * ringImg.naturalHeight;
-      const sourceHeight = (1 - crop.top - crop.bottom) * ringImg.naturalHeight;
-      const destY = -size / 2 + crop.top * size;
-      const destHeight = (1 - crop.top - crop.bottom) * size;
-      ctx.drawImage(
-        ringImg,
-        0,
-        sourceY,
-        ringImg.naturalWidth,
-        sourceHeight,
-        -size / 2,
-        destY,
-        size,
-        destHeight
-      );
+      ctx.beginPath();
+      ringMask.forEach(([px, py], index) => {
+        const pointX = -size / 2 + px * size;
+        const pointY = -size / 2 + py * size;
+        if (index === 0) ctx.moveTo(pointX, pointY);
+        else ctx.lineTo(pointX, pointY);
+      });
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(ringImg, -size / 2, -size / 2, size, size);
       ctx.restore();
       const link = document.createElement('a');
       link.download = 'ring-try-on-preview.png';
