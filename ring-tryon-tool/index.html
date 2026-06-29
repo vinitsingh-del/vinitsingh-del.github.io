@@ -104,7 +104,7 @@
       position: absolute;
       left: 50%;
       top: 76%;
-      width: 215px;
+      width: 90px;
       aspect-ratio: 1;
       transform: translate(-50%, -50%) rotate(-8deg);
       transform-origin: center;
@@ -374,7 +374,7 @@
         <div class="sliders">
           <label class="control">
             Top-view scale
-            <input id="scale" type="range" min="80" max="340" value="215">
+            <input id="scale" type="range" min="18" max="340" value="90">
           </label>
           <label class="control">
             Rotation
@@ -417,7 +417,7 @@
 
     let stream = null;
     let activeImageSrc = '';
-    const defaultRing = { x: 50, y: 76, size: 215, rotation: -8 };
+    const defaultRing = { x: 50, y: 76, size: 90, rotation: -8 };
     const crop = { top: .42, bottom: .20 };
     let ringState = { ...defaultRing };
     let drag = null;
