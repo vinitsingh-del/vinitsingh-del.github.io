@@ -104,7 +104,7 @@
       position: absolute;
       left: 50%;
       top: 76%;
-      width: 70px;
+      width: 78px;
       aspect-ratio: 1;
       transform: translate(-50%, -50%) rotate(-8deg);
       transform-origin: center;
@@ -113,22 +113,7 @@
       touch-action: none;
       display: none;
       z-index: 4;
-      overflow: hidden;
-      clip-path: polygon(
-        0% 46%,
-        16% 46%,
-        28% 38%,
-        38% 24%,
-        45% 15%,
-        50% 10%,
-        55% 15%,
-        62% 24%,
-        72% 38%,
-        84% 46%,
-        100% 46%,
-        100% 72%,
-        0% 72%
-      );
+      overflow: visible;
     }
 
     .ring:active { cursor: grabbing; }
@@ -139,7 +124,7 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      transform: scale(1.12);
+      transform: none;
       pointer-events: none;
       user-select: none;
     }
@@ -361,7 +346,7 @@
         <video class="camera" id="camera" autoplay muted playsinline></video>
         <button class="capture primary" id="capture" type="button">Capture Photo</button>
         <div class="ring" id="ring" aria-label="Worn ring cutout" role="img">
-          <img class="ring-cutout" id="ringCutout" src="https://vinitsingh-del.github.io/mia-gleam-play-enhanced/assets/mia-gleam-play/gleam-ring-top-cutout.png" alt="">
+          <img class="ring-cutout" id="ringCutout" src="assets/mia-gleam-play/ring-reference-clean.png" alt="">
         </div>
         <div class="hint-card" id="hint">
           <b>Real hand reference</b>
@@ -372,7 +357,7 @@
       <aside class="tools">
         <div class="note">
           <b>Preview method</b>
-          <span>Uses the product cutout as a worn band preview. The back arc is hidden so the ring sits around the finger, not on top of it.</span>
+          <span>Uses a cleaned transparent ring cutout from the reference image. Background and bottom product shadow are removed for neater placement.</span>
         </div>
 
         <div class="actions">
@@ -388,7 +373,7 @@
         <div class="sliders">
           <label class="control">
             Top-view scale
-            <input id="scale" type="range" min="12" max="340" value="70">
+            <input id="scale" type="range" min="12" max="340" value="78">
           </label>
           <label class="control">
             Rotation
@@ -431,22 +416,7 @@
 
     let stream = null;
     let activeImageSrc = '';
-    const defaultRing = { x: 50, y: 76, size: 70, rotation: -8 };
-    const ringMask = [
-      [0, .46],
-      [.16, .46],
-      [.28, .38],
-      [.38, .24],
-      [.45, .15],
-      [.50, .10],
-      [.55, .15],
-      [.62, .24],
-      [.72, .38],
-      [.84, .46],
-      [1, .46],
-      [1, .72],
-      [0, .72]
-    ];
+    const defaultRing = { x: 50, y: 76, size: 78, rotation: -8 };
     let ringState = { ...defaultRing };
     let drag = null;
 
@@ -634,15 +604,6 @@
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(ringState.rotation * Math.PI / 180);
-      ctx.beginPath();
-      ringMask.forEach(([px, py], index) => {
-        const pointX = -size / 2 + px * size;
-        const pointY = -size / 2 + py * size;
-        if (index === 0) ctx.moveTo(pointX, pointY);
-        else ctx.lineTo(pointX, pointY);
-      });
-      ctx.closePath();
-      ctx.clip();
       ctx.drawImage(ringImg, -size / 2, -size / 2, size, size);
       ctx.restore();
       const link = document.createElement('a');
