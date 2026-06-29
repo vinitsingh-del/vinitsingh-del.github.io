@@ -104,8 +104,8 @@
       position: absolute;
       left: 50%;
       top: 76%;
-      width: 78px;
-      aspect-ratio: 1;
+      width: 110px;
+      aspect-ratio: 2 / 1;
       transform: translate(-50%, -50%) rotate(-8deg);
       transform-origin: center;
       filter: drop-shadow(0 5px 7px rgba(60,38,32,.28));
@@ -346,7 +346,7 @@
         <video class="camera" id="camera" autoplay muted playsinline></video>
         <button class="capture primary" id="capture" type="button">Capture Photo</button>
         <div class="ring" id="ring" aria-label="Worn ring cutout" role="img">
-          <img class="ring-cutout" id="ringCutout" src="https://raw.githubusercontent.com/vinitsingh-del/vinitsingh-del.github.io/bac6bd66596a3cfa77ae26f57987ddd595e13501/ring-tryon-tool/assets/mia-gleam-play/ring-reference-top.png" alt="">
+          <img class="ring-cutout" id="ringCutout" src="assets/mia-gleam-play/ring-marked-clean.png" alt="">
         </div>
         <div class="hint-card" id="hint">
           <b>Real hand reference</b>
@@ -373,7 +373,7 @@
         <div class="sliders">
           <label class="control">
             Top-view scale
-            <input id="scale" type="range" min="12" max="340" value="78">
+            <input id="scale" type="range" min="20" max="420" value="110">
           </label>
           <label class="control">
             Rotation
@@ -416,7 +416,7 @@
 
     let stream = null;
     let activeImageSrc = '';
-    const defaultRing = { x: 50, y: 76, size: 78, rotation: -8 };
+    const defaultRing = { x: 50, y: 76, size: 110, rotation: -8 };
     let ringState = { ...defaultRing };
     let drag = null;
 
@@ -604,7 +604,8 @@
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(ringState.rotation * Math.PI / 180);
-      ctx.drawImage(ringImg, -size / 2, -size / 2, size, size);
+      const ringHeight = size * (ringImg.naturalHeight / ringImg.naturalWidth);
+      ctx.drawImage(ringImg, -size / 2, -ringHeight / 2, size, ringHeight);
       ctx.restore();
       const link = document.createElement('a');
       link.download = 'ring-try-on-preview.png';
