@@ -104,7 +104,7 @@
       position: absolute;
       left: 50%;
       top: 76%;
-      width: 90px;
+      width: 70px;
       aspect-ratio: 1;
       transform: translate(-50%, -50%) rotate(-8deg);
       transform-origin: center;
@@ -115,17 +115,19 @@
       z-index: 4;
       overflow: hidden;
       clip-path: polygon(
-        0% 32%,
-        29% 32%,
-        38% 23%,
-        45% 16%,
-        50% 12%,
-        55% 16%,
-        62% 23%,
-        71% 32%,
-        100% 32%,
-        100% 82%,
-        0% 82%
+        0% 46%,
+        16% 46%,
+        28% 38%,
+        38% 24%,
+        45% 15%,
+        50% 10%,
+        55% 15%,
+        62% 24%,
+        72% 38%,
+        84% 46%,
+        100% 46%,
+        100% 72%,
+        0% 72%
       );
     }
 
@@ -386,7 +388,7 @@
         <div class="sliders">
           <label class="control">
             Top-view scale
-            <input id="scale" type="range" min="18" max="340" value="90">
+            <input id="scale" type="range" min="12" max="340" value="70">
           </label>
           <label class="control">
             Rotation
@@ -429,19 +431,21 @@
 
     let stream = null;
     let activeImageSrc = '';
-    const defaultRing = { x: 50, y: 76, size: 90, rotation: -8 };
+    const defaultRing = { x: 50, y: 76, size: 70, rotation: -8 };
     const ringMask = [
-      [0, .32],
-      [.29, .32],
-      [.38, .23],
-      [.45, .16],
-      [.50, .12],
-      [.55, .16],
-      [.62, .23],
-      [.71, .32],
-      [1, .32],
-      [1, .82],
-      [0, .82]
+      [0, .46],
+      [.16, .46],
+      [.28, .38],
+      [.38, .24],
+      [.45, .15],
+      [.50, .10],
+      [.55, .15],
+      [.62, .24],
+      [.72, .38],
+      [.84, .46],
+      [1, .46],
+      [1, .72],
+      [0, .72]
     ];
     let ringState = { ...defaultRing };
     let drag = null;
