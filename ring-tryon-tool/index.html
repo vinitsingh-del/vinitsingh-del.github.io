@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>See How It Looks - Ring Try On</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #d64d67;
+      --brand-dark: #bd3f58;
+      --ink: #343236;
+      --muted: #787279;
+      --line: #ece8e8;
+      --soft: #fff6f7;
+      --panel: rgba(255,255,255,.88);
+      --shadow: 0 20px 50px rgba(154, 84, 98, .12);
+      font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(214, 77, 103, .11), transparent 32%),
+        linear-gradient(180deg, #fff 0%, #fff8f8 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .tool {
+      width: min(980px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255,255,255,.94);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 28px);
+    }
+
+    .head {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .kicker {
+      color: var(--brand);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .16em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 3vw, 34px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 380px;
+      aspect-ratio: 1.12 / 1;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #faf8f7;
+      border: 1px solid var(--line);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .reference,
+    .finger,
+    .camera {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .finger,
+    .camera { display: none; }
+
+    .camera { background: #111; transform: scaleX(-1); }
+
+    .ring {
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      width: 76px;
+      transform: translate(-50%, -50%) rotate(-7deg);
+      transform-origin: center;
+      filter: drop-shadow(0 5px 7px rgba(60,38,32,.28));
+      cursor: grab;
+      touch-action: none;
+      display: none;
+      z-index: 4;
+    }
+
+    .ring:active { cursor: grabbing; }
+
+    .hint-card {
+      position: absolute;
+      left: 9%;
+      bottom: 8%;
+      width: min(330px, 78%);
+      border-radius: 18px;
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.7);
+      padding: 18px 22px;
+      z-index: 3;
+    }
+
+    .hint-card b {
+      display: block;
+      font-size: 20px;
+      line-height: 1.12;
+      margin-bottom: 12px;
+    }
+
+    .hint-card span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .tools {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fcfbfb;
+    }
+
+    .note b {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+
+    .note span {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .upload {
+      grid-column: 1 / -1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #downloadBtn { grid-column: 1 / -1; }
+
+    button,
+    .upload {
+      min-height: 56px;
+      border-radius: 14px;
+      border: 2px solid var(--brand);
+      background: #fff;
+      color: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+    }
+
+    button:hover,
+    .upload:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(214,77,103,.13);
+    }
+
+    .primary {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    .upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .sliders {
+      display: grid;
+      gap: 16px;
+      padding-top: 2px;
+    }
+
+    label.control {
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #aaa3a8;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--brand);
+    }
+
+    .placement {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .placement button {
+      min-height: 44px;
+      border-width: 1.5px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .capture {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: none;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .powered {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      background: #302a2d;
+      color: #fff;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (min-width: 760px) {
+      .workspace { grid-template-columns: minmax(0, 1.1fr) minmax(310px, .9fr); }
+      .stage { min-height: 450px; }
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 12px; }
+      .tool { border-radius: 20px; padding: 14px; }
+      .head { gap: 10px; flex-wrap: wrap; }
+      .workspace { padding: 10px; }
+      .stage { min-height: 330px; border-radius: 16px; }
+      .actions { grid-template-columns: 1fr; }
+      .hint-card { left: 7%; bottom: 7%; padding: 15px; }
+      .hint-card b { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="tool" aria-labelledby="title">
+    <div class="head">
+      <span class="kicker">TRY</span>
+      <h1 id="title">See How It Looks</h1>
+    </div>
+
+    <section class="workspace" aria-label="Ring try on tool">
+      <div class="stage" id="stage">
+        <img class="reference" id="reference" src="https://vinitsingh-del.github.io/mia-gleam-play-enhanced/assets/mia-gleam-play/2812FPL_2.jpg" alt="Real hand reference wearing a ring">
+        <img class="finger" id="finger" alt="Uploaded finger preview">
+        <video class="camera" id="camera" autoplay muted playsinline></video>
+        <button class="capture primary" id="capture" type="button">Capture Photo</button>
+        <img class="ring" id="ring" src="https://vinitsingh-del.github.io/mia-gleam-play-enhanced/assets/mia-gleam-play/gleam-ring-top-cutout.png" alt="Top-view ring cutout">
+        <div class="hint-card" id="hint">
+          <b>Real hand reference</b>
+          <span>Upload or capture your finger photo to place the top-view ring cutout on it.</span>
+        </div>
+      </div>
+
+      <aside class="tools">
+        <div class="note">
+          <b>Preview method</b>
+          <span>Uses a flat top-view product cutout for fit direction. Drag the ring after upload for exact finger placement.</span>
+        </div>
+
+        <div class="actions">
+          <label class="upload primary" for="fileInput">
+            Upload Finger
+            <input id="fileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp">
+          </label>
+          <button type="button" id="cameraBtn">Camera</button>
+          <button type="button" id="resetBtn">Reset</button>
+          <button type="button" id="downloadBtn" class="primary">Download Preview</button>
+        </div>
+
+        <div class="sliders">
+          <label class="control">
+            Top-view scale
+            <input id="scale" type="range" min="36" max="150" value="76">
+          </label>
+          <label class="control">
+            Rotation
+            <input id="rotation" type="range" min="-90" max="90" value="-7">
+          </label>
+        </div>
+
+        <div class="placement" aria-label="Fine placement controls">
+          <button type="button" data-nudge="up">Up</button>
+          <button type="button" data-nudge="left">Left</button>
+          <button type="button" data-nudge="right">Right</button>
+          <button type="button" data-nudge="down">Down</button>
+          <button type="button" id="centerBtn">Center</button>
+          <button type="button" id="fitBtn">Fit</button>
+        </div>
+      </aside>
+    </section>
+
+    <div class="footer">
+      <span>Tip: drag the ring directly on the photo, then adjust scale and rotation.</span>
+      <span class="powered">Powered by Troopod</span>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const stage = document.getElementById('stage');
+    const reference = document.getElementById('reference');
+    const finger = document.getElementById('finger');
+    const ring = document.getElementById('ring');
+    const hint = document.getElementById('hint');
+    const fileInput = document.getElementById('fileInput');
+    const scaleInput = document.getElementById('scale');
+    const rotationInput = document.getElementById('rotation');
+    const camera = document.getElementById('camera');
+    const capture = document.getElementById('capture');
+    const toast = document.getElementById('toast');
+
+    let stream = null;
+    let activeImageSrc = '';
+    let ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+    let drag = null;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      camera.pause();
+      camera.srcObject = null;
+      camera.style.display = 'none';
+      capture.style.display = 'none';
+    }
+
+    function applyRing() {
+      ring.style.left = ringState.x + '%';
+      ring.style.top = ringState.y + '%';
+      ring.style.width = ringState.size + 'px';
+      ring.style.transform = `translate(-50%, -50%) rotate(${ringState.rotation}deg)`;
+      scaleInput.value = ringState.size;
+      rotationInput.value = ringState.rotation;
+    }
+
+    function showRing() {
+      ring.style.display = 'block';
+      hint.style.display = 'none';
+      applyRing();
+    }
+
+    function loadFinger(src) {
+      stopCamera();
+      activeImageSrc = src;
+      finger.onload = () => {
+        reference.style.display = 'none';
+        finger.style.display = 'block';
+        ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+        showRing();
+        showToast('Ring ready. Drag it onto the finger.');
+      };
+      finger.onerror = () => {
+        showToast('This image could not be loaded. Try JPG or PNG.');
+        resetTool();
+      };
+      finger.src = src;
+    }
+
+    function resetTool() {
+      stopCamera();
+      fileInput.value = '';
+      activeImageSrc = '';
+      finger.removeAttribute('src');
+      finger.style.display = 'none';
+      reference.style.display = 'block';
+      ring.style.display = 'none';
+      hint.style.display = 'block';
+      ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+      applyRing();
+    }
+
+    fileInput.addEventListener('change', event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (file.type && !file.type.startsWith('image/')) {
+        showToast('Please upload an image file.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => loadFinger(reader.result);
+      reader.onerror = () => showToast('Could not read this image.');
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('cameraBtn').addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Camera is not available in this browser.');
+        return;
+      }
+      try {
+        reference.style.display = 'none';
+        finger.style.display = 'none';
+        ring.style.display = 'none';
+        hint.style.display = 'none';
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        camera.srcObject = stream;
+        camera.style.display = 'block';
+        capture.style.display = 'inline-flex';
+        await camera.play();
+        showToast('Camera ready. Tap capture.');
+      } catch (error) {
+        resetTool();
+        showToast('Camera permission is needed.');
+      }
+    });
+
+    capture.addEventListener('click', () => {
+      if (!camera.videoWidth) {
+        showToast('Camera is still loading.');
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = camera.videoWidth;
+      canvas.height = camera.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
+      loadFinger(canvas.toDataURL('image/jpeg', .92));
+    });
+
+    ring.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      ring.setPointerCapture(event.pointerId);
+      const rect = stage.getBoundingClientRect();
+      drag = {
+        dx: event.clientX - (rect.left + rect.width * ringState.x / 100),
+        dy: event.clientY - (rect.top + rect.height * ringState.y / 100)
+      };
+    });
+
+    ring.addEventListener('pointermove', event => {
+      if (!drag) return;
+      const rect = stage.getBoundingClientRect();
+      ringState.x = ((event.clientX - drag.dx - rect.left) / rect.width) * 100;
+      ringState.y = ((event.clientY - drag.dy - rect.top) / rect.height) * 100;
+      applyRing();
+    });
+
+    ring.addEventListener('pointerup', () => { drag = null; });
+    ring.addEventListener('pointercancel', () => { drag = null; });
+
+    scaleInput.addEventListener('input', () => {
+      ringState.size = Number(scaleInput.value);
+      showRing();
+    });
+
+    rotationInput.addEventListener('input', () => {
+      ringState.rotation = Number(rotationInput.value);
+      showRing();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', resetTool);
+    document.getElementById('centerBtn').addEventListener('click', () => {
+      ringState.x = 50;
+      ringState.y = 56;
+      showRing();
+    });
+    document.getElementById('fitBtn').addEventListener('click', () => {
+      ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+      showRing();
+    });
+
+    document.querySelectorAll('[data-nudge]').forEach(button => {
+      button.addEventListener('click', () => {
+        const step = 1.6;
+        const direction = button.dataset.nudge;
+        if (direction === 'up') ringState.y -= step;
+        if (direction === 'down') ringState.y += step;
+        if (direction === 'left') ringState.x -= step;
+        if (direction === 'right') ringState.x += step;
+        showRing();
+      });
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', async () => {
+      const baseSrc = activeImageSrc || reference.src;
+      const base = await loadDrawable(baseSrc);
+      const ringImg = await loadDrawable(ring.src);
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 1200;
+      const ctx = canvas.getContext('2d');
+      drawCover(ctx, base, canvas.width, canvas.height);
+      const stageRect = stage.getBoundingClientRect();
+      const normalizedSize = ringState.size / stageRect.width;
+      const size = normalizedSize * canvas.width;
+      const x = ringState.x / 100 * canvas.width;
+      const y = ringState.y / 100 * canvas.height;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(ringState.rotation * Math.PI / 180);
+      ctx.drawImage(ringImg, -size / 2, -size / 2, size, size);
+      ctx.restore();
+      const link = document.createElement('a');
+      link.download = 'ring-try-on-preview.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Preview downloaded.');
+    });
+
+    function loadDrawable(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function drawCover(ctx, img, width, height) {
+      const ratio = Math.max(width / img.naturalWidth, height / img.naturalHeight);
+      const drawWidth = img.naturalWidth * ratio;
+      const drawHeight = img.naturalHeight * ratio;
+      ctx.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+    }
+
+    applyRing();
+  </script>
+</body>
+</html>
