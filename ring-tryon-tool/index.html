@@ -103,18 +103,32 @@
     .ring {
       position: absolute;
       left: 50%;
-      top: 56%;
-      width: 76px;
-      transform: translate(-50%, -50%) rotate(-7deg);
+      top: 76%;
+      width: 215px;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%) rotate(-8deg);
       transform-origin: center;
       filter: drop-shadow(0 5px 7px rgba(60,38,32,.28));
       cursor: grab;
       touch-action: none;
       display: none;
       z-index: 4;
+      overflow: hidden;
+      clip-path: inset(42% 1% 20% 1% round 8px);
     }
 
     .ring:active { cursor: grabbing; }
+
+    .ring-cutout {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transform: scale(1.12);
+      pointer-events: none;
+      user-select: none;
+    }
 
     .hint-card {
       position: absolute;
@@ -332,7 +346,9 @@
         <img class="finger" id="finger" alt="Uploaded finger preview">
         <video class="camera" id="camera" autoplay muted playsinline></video>
         <button class="capture primary" id="capture" type="button">Capture Photo</button>
-        <img class="ring" id="ring" src="https://vinitsingh-del.github.io/mia-gleam-play-enhanced/assets/mia-gleam-play/gleam-ring-top-cutout.png" alt="Top-view ring cutout">
+        <div class="ring" id="ring" aria-label="Worn ring cutout" role="img">
+          <img class="ring-cutout" id="ringCutout" src="https://vinitsingh-del.github.io/mia-gleam-play-enhanced/assets/mia-gleam-play/gleam-ring-top-cutout.png" alt="">
+        </div>
         <div class="hint-card" id="hint">
           <b>Real hand reference</b>
           <span>Upload or capture your finger photo to place the top-view ring cutout on it.</span>
@@ -342,7 +358,7 @@
       <aside class="tools">
         <div class="note">
           <b>Preview method</b>
-          <span>Uses a flat top-view product cutout for fit direction. Drag the ring after upload for exact finger placement.</span>
+          <span>Uses the product cutout as a worn band preview. The back arc is hidden so the ring sits around the finger, not on top of it.</span>
         </div>
 
         <div class="actions">
@@ -358,11 +374,11 @@
         <div class="sliders">
           <label class="control">
             Top-view scale
-            <input id="scale" type="range" min="36" max="150" value="76">
+            <input id="scale" type="range" min="80" max="340" value="215">
           </label>
           <label class="control">
             Rotation
-            <input id="rotation" type="range" min="-90" max="90" value="-7">
+            <input id="rotation" type="range" min="-90" max="90" value="-8">
           </label>
         </div>
 
@@ -390,6 +406,7 @@
     const reference = document.getElementById('reference');
     const finger = document.getElementById('finger');
     const ring = document.getElementById('ring');
+    const ringCutout = document.getElementById('ringCutout');
     const hint = document.getElementById('hint');
     const fileInput = document.getElementById('fileInput');
     const scaleInput = document.getElementById('scale');
@@ -400,7 +417,9 @@
 
     let stream = null;
     let activeImageSrc = '';
-    let ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+    const defaultRing = { x: 50, y: 76, size: 215, rotation: -8 };
+    const crop = { top: .42, bottom: .20 };
+    let ringState = { ...defaultRing };
     let drag = null;
 
     function showToast(message) {
@@ -442,7 +461,7 @@
       finger.onload = () => {
         reference.style.display = 'none';
         finger.style.display = 'block';
-        ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+        ringState = { ...defaultRing };
         showRing();
         showToast('Ring ready. Drag it onto the finger.');
       };
@@ -462,7 +481,7 @@
       reference.style.display = 'block';
       ring.style.display = 'none';
       hint.style.display = 'block';
-      ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+      ringState = { ...defaultRing };
       applyRing();
     }
 
@@ -549,12 +568,12 @@
 
     document.getElementById('resetBtn').addEventListener('click', resetTool);
     document.getElementById('centerBtn').addEventListener('click', () => {
-      ringState.x = 50;
-      ringState.y = 56;
+      ringState.x = defaultRing.x;
+      ringState.y = defaultRing.y;
       showRing();
     });
     document.getElementById('fitBtn').addEventListener('click', () => {
-      ringState = { x: 50, y: 56, size: 76, rotation: -7 };
+      ringState = { ...defaultRing };
       showRing();
     });
 
@@ -573,7 +592,7 @@
     document.getElementById('downloadBtn').addEventListener('click', async () => {
       const baseSrc = activeImageSrc || reference.src;
       const base = await loadDrawable(baseSrc);
-      const ringImg = await loadDrawable(ring.src);
+      const ringImg = await loadDrawable(ringCutout.src);
       const canvas = document.createElement('canvas');
       canvas.width = 1200;
       canvas.height = 1200;
@@ -587,7 +606,21 @@
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(ringState.rotation * Math.PI / 180);
-      ctx.drawImage(ringImg, -size / 2, -size / 2, size, size);
+      const sourceY = crop.top * ringImg.naturalHeight;
+      const sourceHeight = (1 - crop.top - crop.bottom) * ringImg.naturalHeight;
+      const destY = -size / 2 + crop.top * size;
+      const destHeight = (1 - crop.top - crop.bottom) * size;
+      ctx.drawImage(
+        ringImg,
+        0,
+        sourceY,
+        ringImg.naturalWidth,
+        sourceHeight,
+        -size / 2,
+        destY,
+        size,
+        destHeight
+      );
       ctx.restore();
       const link = document.createElement('a');
       link.download = 'ring-try-on-preview.png';
