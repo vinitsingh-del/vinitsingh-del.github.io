@@ -96,9 +96,19 @@
     }
 
     .finger,
-    .camera { display: none; }
+    .camera,
+    .ai-result { display: none; }
 
     .camera { background: #111; transform: scaleX(-1); }
+
+    .ai-result {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 3;
+    }
 
     .ring {
       position: absolute;
@@ -247,6 +257,58 @@
       text-transform: uppercase;
     }
 
+    .ai-panel {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .ai-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ai-field {
+      display: grid;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #aaa3a8;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .ai-field.full { grid-column: 1 / -1; }
+
+    .ai-field input,
+    .ai-field select {
+      width: 100%;
+      min-height: 44px;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 0 12px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      background: #fff;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .ai-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .manual-tools[hidden] { display: none; }
+
     input[type="range"] {
       width: 100%;
       accent-color: var(--brand);
@@ -327,6 +389,7 @@
       .workspace { padding: 10px; }
       .stage { min-height: 330px; border-radius: 16px; }
       .actions { grid-template-columns: 1fr; }
+      .ai-grid { grid-template-columns: 1fr; }
       .hint-card { left: 7%; bottom: 7%; padding: 15px; }
       .hint-card b { font-size: 17px; }
     }
@@ -343,6 +406,7 @@
       <div class="stage" id="stage">
         <img class="reference" id="reference" src="https://vinitsingh-del.github.io/mia-gleam-play-enhanced/assets/mia-gleam-play/2812FPL_2.jpg" alt="Real hand reference wearing a ring">
         <img class="finger" id="finger" alt="Uploaded finger preview">
+        <img class="ai-result" id="aiResult" alt="AI fitted ring preview">
         <video class="camera" id="camera" autoplay muted playsinline></video>
         <button class="capture primary" id="capture" type="button">Capture Photo</button>
         <div class="ring" id="ring" aria-label="Worn ring cutout" role="img">
@@ -357,7 +421,36 @@
       <aside class="tools">
         <div class="note">
           <b>Preview method</b>
-          <span>Uses a cleaned transparent ring cutout from the reference image. Background and bottom product shadow are removed for neater placement.</span>
+          <span>Upload a hand photo, choose the finger, then generate a fitted preview with Nano Banana. Manual placement remains available as a fallback.</span>
+        </div>
+
+        <div class="ai-panel">
+          <div class="ai-grid">
+            <label class="ai-field full">
+              Gemini API key
+              <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Paste key for this browser session">
+            </label>
+            <label class="ai-field">
+              Place on
+              <select id="fingerSelect">
+                <option value="ring finger">Ring finger</option>
+                <option value="index finger">Index finger</option>
+                <option value="middle finger">Middle finger</option>
+                <option value="little finger">Little finger</option>
+                <option value="thumb">Thumb</option>
+              </select>
+            </label>
+            <label class="ai-field">
+              Hand side
+              <select id="handSelect">
+                <option value="auto-detect">Auto-detect</option>
+                <option value="left hand">Left hand</option>
+                <option value="right hand">Right hand</option>
+              </select>
+            </label>
+          </div>
+          <button type="button" id="aiGenerateBtn" class="primary">Fit With Nano Banana</button>
+          <div class="ai-status" id="aiStatus">Upload a finger photo first, then choose where the ring should go.</div>
         </div>
 
         <div class="actions">
@@ -370,7 +463,7 @@
           <button type="button" id="downloadBtn" class="primary">Download Preview</button>
         </div>
 
-        <div class="sliders">
+        <div class="sliders manual-tools" id="manualTools">
           <label class="control">
             Top-view scale
             <input id="scale" type="range" min="20" max="420" value="110">
@@ -393,7 +486,7 @@
     </section>
 
     <div class="footer">
-      <span>Tip: drag the ring directly on the photo, then adjust scale and rotation.</span>
+      <span>Tip: AI fit uses your uploaded hand photo, selected finger, and the product reference.</span>
       <span class="powered">Powered by Troopod</span>
     </div>
   </main>
@@ -404,18 +497,27 @@
     const stage = document.getElementById('stage');
     const reference = document.getElementById('reference');
     const finger = document.getElementById('finger');
+    const aiResult = document.getElementById('aiResult');
     const ring = document.getElementById('ring');
     const ringCutout = document.getElementById('ringCutout');
     const hint = document.getElementById('hint');
     const fileInput = document.getElementById('fileInput');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const fingerSelect = document.getElementById('fingerSelect');
+    const handSelect = document.getElementById('handSelect');
+    const aiGenerateBtn = document.getElementById('aiGenerateBtn');
+    const aiStatus = document.getElementById('aiStatus');
     const scaleInput = document.getElementById('scale');
     const rotationInput = document.getElementById('rotation');
     const camera = document.getElementById('camera');
     const capture = document.getElementById('capture');
     const toast = document.getElementById('toast');
+    const productReferenceSrc = 'assets/mia-gleam-play/nano-product-ring.png';
 
     let stream = null;
     let activeImageSrc = '';
+    let activeMimeType = 'image/png';
+    let aiResultSrc = '';
     const defaultRing = { x: 50, y: 76, size: 110, rotation: -8 };
     let ringState = { ...defaultRing };
     let drag = null;
@@ -425,6 +527,10 @@
       toast.classList.add('show');
       clearTimeout(showToast.timer);
       showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function setAiStatus(message) {
+      aiStatus.textContent = message;
     }
 
     function stopCamera() {
@@ -456,12 +562,17 @@
     function loadFinger(src) {
       stopCamera();
       activeImageSrc = src;
+      aiResultSrc = '';
+      aiResult.removeAttribute('src');
+      aiResult.style.display = 'none';
       finger.onload = () => {
         reference.style.display = 'none';
         finger.style.display = 'block';
         ringState = { ...defaultRing };
-        showRing();
-        showToast('Ring ready. Drag it onto the finger.');
+        ring.style.display = 'none';
+        hint.style.display = 'none';
+        setAiStatus('Choose the finger, then tap Fit With Nano Banana.');
+        showToast('Photo ready. Choose the finger to place the ring.');
       };
       finger.onerror = () => {
         showToast('This image could not be loaded. Try JPG or PNG.');
@@ -474,13 +585,17 @@
       stopCamera();
       fileInput.value = '';
       activeImageSrc = '';
+      aiResultSrc = '';
       finger.removeAttribute('src');
       finger.style.display = 'none';
+      aiResult.removeAttribute('src');
+      aiResult.style.display = 'none';
       reference.style.display = 'block';
       ring.style.display = 'none';
       hint.style.display = 'block';
       ringState = { ...defaultRing };
       applyRing();
+      setAiStatus('Upload a finger photo first, then choose where the ring should go.');
     }
 
     fileInput.addEventListener('change', event => {
@@ -493,6 +608,7 @@
       const reader = new FileReader();
       reader.onload = () => loadFinger(reader.result);
       reader.onerror = () => showToast('Could not read this image.');
+      activeMimeType = file.type || 'image/png';
       reader.readAsDataURL(file);
     });
 
@@ -530,7 +646,51 @@
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
+      activeMimeType = 'image/jpeg';
       loadFinger(canvas.toDataURL('image/jpeg', .92));
+    });
+
+    aiGenerateBtn.addEventListener('click', async () => {
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) {
+        showToast('Paste your Gemini API key first.');
+        setAiStatus('Paste a Gemini API key to run Nano Banana from this static page.');
+        apiKeyInput.focus();
+        return;
+      }
+      if (!activeImageSrc) {
+        showToast('Upload a finger photo first.');
+        setAiStatus('Upload a finger photo before generating the AI preview.');
+        return;
+      }
+
+      aiGenerateBtn.disabled = true;
+      aiGenerateBtn.textContent = 'Generating...';
+      setAiStatus('Nano Banana is fitting the ring to the selected finger.');
+
+      try {
+        const hand = dataUrlParts(activeImageSrc, activeMimeType);
+        const product = await imageUrlToInlineData(productReferenceSrc);
+        const result = await generateNanoBananaFit(apiKey, hand, product);
+        aiResultSrc = result;
+        aiResult.onload = () => {
+          reference.style.display = 'none';
+          finger.style.display = 'none';
+          ring.style.display = 'none';
+          aiResult.style.display = 'block';
+          hint.style.display = 'none';
+          setAiStatus('AI fitted preview ready. Download Preview saves this result.');
+          showToast('AI fitted preview ready.');
+        };
+        aiResult.src = result;
+      } catch (error) {
+        console.error(error);
+        setAiStatus(error.message || 'Could not generate the AI preview.');
+        showToast('AI generation failed.');
+      } finally {
+        aiGenerateBtn.disabled = false;
+        aiGenerateBtn.textContent = 'Fit With Nano Banana';
+      }
     });
 
     ring.addEventListener('pointerdown', event => {
@@ -588,6 +748,14 @@
     });
 
     document.getElementById('downloadBtn').addEventListener('click', async () => {
+      if (aiResultSrc) {
+        const link = document.createElement('a');
+        link.download = 'ai-ring-try-on-preview.png';
+        link.href = aiResultSrc;
+        link.click();
+        showToast('AI preview downloaded.');
+        return;
+      }
       const baseSrc = activeImageSrc || reference.src;
       const base = await loadDrawable(baseSrc);
       const ringImg = await loadDrawable(ringCutout.src);
@@ -622,6 +790,87 @@
         img.onerror = reject;
         img.src = src;
       });
+    }
+
+    function dataUrlParts(dataUrl, fallbackMime) {
+      const match = dataUrl.match(/^data:([^;]+);base64,(.*)$/);
+      if (!match) throw new Error('Uploaded image could not be prepared.');
+      return { mimeType: match[1] || fallbackMime || 'image/png', data: match[2] };
+    }
+
+    async function imageUrlToInlineData(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Product image could not be loaded.');
+      const blob = await response.blob();
+      const dataUrl = await blobToDataUrl(blob);
+      return dataUrlParts(dataUrl, blob.type || 'image/png');
+    }
+
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Image could not be read.'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function generateNanoBananaFit(apiKey, hand, product) {
+      const selectedFinger = fingerSelect.value;
+      const handSide = handSelect.value;
+      const prompt = [
+        'Edit the hand photo into a realistic jewelry try-on preview.',
+        `Place the provided ring product on the ${selectedFinger}.`,
+        handSide === 'auto-detect' ? 'Auto-detect whether this is the left or right hand.' : `Treat this as the ${handSide}.`,
+        'Preserve the uploaded hand photo composition, skin texture, lighting, background, and camera angle.',
+        'Use the product reference as the ring design. Fit it naturally around the finger with correct perspective, scale, occlusion, and shadows.',
+        'Do not add extra rings, text, watermarks, labels, UI, or decorative elements.',
+        'Return only the edited image.'
+      ].join(' ');
+
+      const models = ['gemini-3.1-flash-image', 'gemini-2.5-flash-image-preview'];
+      let lastError = null;
+      for (const model of models) {
+        try {
+          return await callGeminiImageModel(apiKey, model, prompt, hand, product);
+        } catch (error) {
+          lastError = error;
+          if (!/404|not found|model/i.test(error.message)) break;
+        }
+      }
+      throw lastError || new Error('Nano Banana did not return an image.');
+    }
+
+    async function callGeminiImageModel(apiKey, model, prompt, hand, product) {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          contents: [{
+            role: 'user',
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: hand.mimeType, data: hand.data } },
+              { inline_data: { mime_type: product.mimeType, data: product.data } }
+            ]
+          }],
+          generationConfig: { responseModalities: ['IMAGE'] }
+        })
+      });
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = json.error && json.error.message ? json.error.message : `Nano Banana request failed (${response.status}).`;
+        throw new Error(message);
+      }
+      const parts = (json.candidates || []).flatMap(candidate => candidate.content && candidate.content.parts ? candidate.content.parts : []);
+      const imagePart = parts.find(part => part.inlineData || part.inline_data);
+      const inline = imagePart && (imagePart.inlineData || imagePart.inline_data);
+      if (!inline || !inline.data) throw new Error('Nano Banana did not return an image.');
+      const mimeType = inline.mimeType || inline.mime_type || 'image/png';
+      return `data:${mimeType};base64,${inline.data}`;
     }
 
     function drawCover(ctx, img, width, height) {
