@@ -308,6 +308,46 @@
       line-height: 1.4;
     }
 
+    .variant-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .variant-card {
+      min-height: auto;
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 6px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 11px;
+      line-height: 1.15;
+      text-align: center;
+    }
+
+    .variant-card img {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #f6f4f1;
+    }
+
+    .variant-card.active {
+      border-color: var(--brand);
+      color: var(--brand);
+      box-shadow: 0 10px 22px rgba(214,77,103,.12);
+    }
+
+    .variant-card:focus-visible {
+      outline: 3px solid rgba(214,77,103,.28);
+      outline-offset: 2px;
+    }
+
     .manual-tools[hidden] { display: none; }
 
     input[type="range"] {
@@ -317,7 +357,7 @@
 
     .placement {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
     }
 
@@ -388,9 +428,18 @@
       .tool { border-radius: 20px; padding: 14px; }
       .head { gap: 10px; flex-wrap: wrap; }
       .workspace { padding: 10px; }
-      .stage { min-height: 330px; border-radius: 16px; }
+      .stage {
+        width: 100%;
+        min-height: 0;
+        height: clamp(300px, 84vw, 340px);
+        aspect-ratio: auto;
+        border-radius: 16px;
+      }
       .actions { grid-template-columns: 1fr; }
       .ai-grid { grid-template-columns: 1fr; }
+      .variant-list { gap: 6px; }
+      .variant-card { padding: 7px 4px; font-size: 10px; }
+      .variant-card img { width: 46px; height: 46px; }
       .hint-card { left: 7%; bottom: 7%; padding: 15px; }
       .hint-card b { font-size: 17px; }
     }
@@ -422,10 +471,27 @@
       <aside class="tools">
         <div class="note">
           <b>Preview method</b>
-          <span>Upload a hand photo, choose the finger, then generate a fitted preview with Puter GPT image editing. Manual placement remains available as a fallback.</span>
+          <span>Upload a hand photo, choose a MIA ring, select the finger, then generate a fitted preview with TrooPodLLM. Manual placement remains available as a fallback.</span>
         </div>
 
         <div class="ai-panel">
+          <div class="ai-field full">
+            Choose ring
+            <div class="variant-list" id="variantList">
+              <button type="button" class="variant-card active" data-variant="gleam">
+                <img src="assets/mia-gleam-play/nano-product-ring.png" alt="">
+                <span>Gleam V</span>
+              </button>
+              <button type="button" class="variant-card" data-variant="solitaire">
+                <img src="assets/mia-gleam-play/mia-ring-solitaire.png" alt="">
+                <span>Solitaire</span>
+              </button>
+              <button type="button" class="variant-card" data-variant="lattice">
+                <img src="assets/mia-gleam-play/mia-ring-lattice.png" alt="">
+                <span>Lattice</span>
+              </button>
+            </div>
+          </div>
           <div class="ai-grid">
             <label class="ai-field">
               Place on
@@ -446,8 +512,8 @@
               </select>
             </label>
           </div>
-          <button type="button" id="aiGenerateBtn" class="primary">Fit With Puter GPT</button>
-          <div class="ai-status" id="aiStatus">Upload a finger photo first. Puter GPT runs in the browser without your OpenAI key.</div>
+          <button type="button" id="aiGenerateBtn" class="primary">Fit By TrooPodLLM</button>
+          <div class="ai-status" id="aiStatus">Upload a finger photo first. TrooPodLLM will fit the selected MIA ring.</div>
         </div>
 
         <div class="actions">
@@ -464,10 +530,6 @@
           <label class="control">
             Top-view scale
             <input id="scale" type="range" min="20" max="420" value="110">
-          </label>
-          <label class="control">
-            Rotation
-            <input id="rotation" type="range" min="-90" max="90" value="-8">
           </label>
         </div>
 
@@ -504,19 +566,40 @@
     const aiGenerateBtn = document.getElementById('aiGenerateBtn');
     const aiStatus = document.getElementById('aiStatus');
     const scaleInput = document.getElementById('scale');
-    const rotationInput = document.getElementById('rotation');
     const camera = document.getElementById('camera');
     const capture = document.getElementById('capture');
     const toast = document.getElementById('toast');
-    const productReferenceSrc = 'assets/mia-gleam-play/nano-product-ring.png';
+    const variantList = document.getElementById('variantList');
+    const ringVariants = {
+      gleam: {
+        name: 'Gleam V',
+        productSrc: 'assets/mia-gleam-play/nano-product-ring.png',
+        overlaySrc: 'assets/mia-gleam-play/ring-marked-clean.png'
+      },
+      solitaire: {
+        name: 'Solitaire',
+        productSrc: 'assets/mia-gleam-play/mia-ring-solitaire.png',
+        overlaySrc: 'assets/mia-gleam-play/mia-ring-solitaire.png'
+      },
+      lattice: {
+        name: 'Lattice',
+        productSrc: 'assets/mia-gleam-play/mia-ring-lattice.png',
+        overlaySrc: 'assets/mia-gleam-play/mia-ring-lattice.png'
+      }
+    };
 
     let stream = null;
     let activeImageSrc = '';
     let activeMimeType = 'image/png';
     let aiResultSrc = '';
-    const defaultRing = { x: 50, y: 76, size: 110, rotation: -8 };
+    let selectedVariantKey = 'gleam';
+    const defaultRing = { x: 50, y: 76, size: 110 };
     let ringState = { ...defaultRing };
     let drag = null;
+
+    function getSelectedVariant() {
+      return ringVariants[selectedVariantKey] || ringVariants.gleam;
+    }
 
     function showToast(message) {
       toast.textContent = message;
@@ -544,9 +627,8 @@
       ring.style.left = ringState.x + '%';
       ring.style.top = ringState.y + '%';
       ring.style.width = ringState.size + 'px';
-      ring.style.transform = `translate(-50%, -50%) rotate(${ringState.rotation}deg)`;
+      ring.style.transform = 'translate(-50%, -50%)';
       scaleInput.value = ringState.size;
-      rotationInput.value = ringState.rotation;
     }
 
     function showRing() {
@@ -567,8 +649,8 @@
         ringState = { ...defaultRing };
         ring.style.display = 'none';
         hint.style.display = 'none';
-        setAiStatus('Choose the finger, then tap Fit With Puter GPT.');
-        showToast('Photo ready. Choose the finger to place the ring.');
+        setAiStatus(`Choose the finger, then tap Fit By TrooPodLLM for ${getSelectedVariant().name}.`);
+        showToast('Photo ready. Choose the ring and finger.');
       };
       finger.onerror = () => {
         showToast('This image could not be loaded. Try JPG or PNG.');
@@ -591,8 +673,30 @@
       hint.style.display = 'block';
       ringState = { ...defaultRing };
       applyRing();
-      setAiStatus('Upload a finger photo first, then choose where the ring should go.');
+      setAiStatus('Upload a finger photo first. TrooPodLLM will fit the selected MIA ring.');
     }
+
+    variantList.addEventListener('click', event => {
+      const card = event.target.closest('[data-variant]');
+      if (!card || !ringVariants[card.dataset.variant]) return;
+      selectedVariantKey = card.dataset.variant;
+      variantList.querySelectorAll('.variant-card').forEach(button => {
+        button.classList.toggle('active', button === card);
+      });
+      const variant = getSelectedVariant();
+      ringCutout.src = variant.overlaySrc;
+      aiResultSrc = '';
+      aiResult.removeAttribute('src');
+      aiResult.style.display = 'none';
+      if (activeImageSrc) {
+        finger.style.display = 'block';
+        ring.style.display = 'none';
+        setAiStatus(`Selected ${variant.name}. Choose the finger, then tap Fit By TrooPodLLM.`);
+      } else {
+        reference.style.display = 'block';
+        setAiStatus(`Selected ${variant.name}. Upload a finger photo to start.`);
+      }
+    });
 
     fileInput.addEventListener('change', event => {
       const file = event.target.files && event.target.files[0];
@@ -655,10 +759,10 @@
 
       aiGenerateBtn.disabled = true;
       aiGenerateBtn.textContent = 'Generating...';
-      setAiStatus('Puter GPT is fitting the ring to the selected finger.');
+      setAiStatus('TrooPodLLM is fitting the selected ring to the chosen finger.');
 
       try {
-        const product = await imageUrlToDataUrl(productReferenceSrc);
+        const product = await imageUrlToDataUrl(getSelectedVariant().productSrc);
         const result = await generatePuterFit(product);
         aiResultSrc = result;
         aiResult.onload = () => {
@@ -667,8 +771,8 @@
           ring.style.display = 'none';
           aiResult.style.display = 'block';
           hint.style.display = 'none';
-          setAiStatus('AI fitted preview ready. Download Preview saves this result.');
-          showToast('AI fitted preview ready.');
+          setAiStatus('TrooPodLLM fitted preview ready. Download Preview saves this result.');
+          showToast('Fitted preview ready.');
         };
         aiResult.src = result;
       } catch (error) {
@@ -677,7 +781,7 @@
         showToast('AI generation failed.');
       } finally {
         aiGenerateBtn.disabled = false;
-        aiGenerateBtn.textContent = 'Fit With Puter GPT';
+        aiGenerateBtn.textContent = 'Fit By TrooPodLLM';
       }
     });
 
@@ -704,11 +808,6 @@
 
     scaleInput.addEventListener('input', () => {
       ringState.size = Number(scaleInput.value);
-      showRing();
-    });
-
-    rotationInput.addEventListener('input', () => {
-      ringState.rotation = Number(rotationInput.value);
       showRing();
     });
 
@@ -759,7 +858,6 @@
       const y = ringState.y / 100 * canvas.height;
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(ringState.rotation * Math.PI / 180);
       const ringHeight = size * (ringImg.naturalHeight / ringImg.naturalWidth);
       ctx.drawImage(ringImg, -size / 2, -ringHeight / 2, size, ringHeight);
       ctx.restore();
@@ -804,10 +902,11 @@
       const composite = await createPuterReferenceImage(activeImageSrc, productImage);
       const selectedFinger = fingerSelect.value;
       const handSide = handSelect.value;
+      const selectedRing = getSelectedVariant().name;
       const prompt = [
         'Create a realistic jewelry virtual try-on from this reference image.',
         'The left/main image is the customer hand photo. The right product panel is only the ring design reference.',
-        `Place the exact ring design from the product panel onto the ${selectedFinger} of the hand photo.`,
+        `Place the exact ${selectedRing} ring design from the product panel onto the ${selectedFinger} of the hand photo.`,
         handSide === 'auto-detect' ? 'Auto-detect whether the hand is left or right.' : `Treat the hand as the ${handSide}.`,
         'Fit the ring naturally around the finger with correct perspective, scale, occlusion, contact shadows, and lighting.',
         'Return only the edited hand photo. Do not include the product panel, labels, split-screen layout, extra rings, text, logos, or watermarks.'
