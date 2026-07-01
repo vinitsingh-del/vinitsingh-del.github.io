@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://js.puter.com/v2/"></script>
   <style>
     :root {
       --brand: #d64d67;
@@ -421,7 +422,7 @@
       <aside class="tools">
         <div class="note">
           <b>Preview method</b>
-          <span>Upload a hand photo, choose the finger, then generate a fitted preview with GPT image editing. Manual placement remains available as a fallback.</span>
+          <span>Upload a hand photo, choose the finger, then generate a fitted preview with Puter GPT image editing. Manual placement remains available as a fallback.</span>
         </div>
 
         <div class="ai-panel">
@@ -445,8 +446,8 @@
               </select>
             </label>
           </div>
-          <button type="button" id="aiGenerateBtn" class="primary">Fit With GPT</button>
-          <div class="ai-status" id="aiStatus">Upload a finger photo first. GPT fitting runs through the local OpenAI proxy.</div>
+          <button type="button" id="aiGenerateBtn" class="primary">Fit With Puter GPT</button>
+          <div class="ai-status" id="aiStatus">Upload a finger photo first. Puter GPT runs in the browser without your OpenAI key.</div>
         </div>
 
         <div class="actions">
@@ -508,7 +509,6 @@
     const capture = document.getElementById('capture');
     const toast = document.getElementById('toast');
     const productReferenceSrc = 'assets/mia-gleam-play/nano-product-ring.png';
-    const openAIProxyUrl = 'http://127.0.0.1:8787/api/fit-ring';
 
     let stream = null;
     let activeImageSrc = '';
@@ -567,7 +567,7 @@
         ringState = { ...defaultRing };
         ring.style.display = 'none';
         hint.style.display = 'none';
-        setAiStatus('Choose the finger, then tap Fit With GPT.');
+        setAiStatus('Choose the finger, then tap Fit With Puter GPT.');
         showToast('Photo ready. Choose the finger to place the ring.');
       };
       finger.onerror = () => {
@@ -655,11 +655,11 @@
 
       aiGenerateBtn.disabled = true;
       aiGenerateBtn.textContent = 'Generating...';
-      setAiStatus('GPT is fitting the ring to the selected finger.');
+      setAiStatus('Puter GPT is fitting the ring to the selected finger.');
 
       try {
         const product = await imageUrlToDataUrl(productReferenceSrc);
-        const result = await generateOpenAIFit(product);
+        const result = await generatePuterFit(product);
         aiResultSrc = result;
         aiResult.onload = () => {
           reference.style.display = 'none';
@@ -677,7 +677,7 @@
         showToast('AI generation failed.');
       } finally {
         aiGenerateBtn.disabled = false;
-        aiGenerateBtn.textContent = 'Fit With GPT';
+        aiGenerateBtn.textContent = 'Fit With Puter GPT';
       }
     });
 
@@ -796,24 +796,61 @@
       });
     }
 
-    async function generateOpenAIFit(productImage) {
-      const response = await fetch(openAIProxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          handImage: activeImageSrc,
-          productImage,
-          finger: fingerSelect.value,
-          handSide: handSelect.value
-        })
-      });
-      const json = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const message = json.error || `OpenAI proxy failed (${response.status}).`;
-        throw new Error(message);
+    async function generatePuterFit(productImage) {
+      if (!window.puter || !puter.ai || !puter.ai.txt2img) {
+        throw new Error('Puter.js did not load. Refresh the page and try again.');
       }
-      if (!json.image) throw new Error('OpenAI proxy did not return an image.');
-      return json.image;
+
+      const composite = await createPuterReferenceImage(activeImageSrc, productImage);
+      const selectedFinger = fingerSelect.value;
+      const handSide = handSelect.value;
+      const prompt = [
+        'Create a realistic jewelry virtual try-on from this reference image.',
+        'The left/main image is the customer hand photo. The right product panel is only the ring design reference.',
+        `Place the exact ring design from the product panel onto the ${selectedFinger} of the hand photo.`,
+        handSide === 'auto-detect' ? 'Auto-detect whether the hand is left or right.' : `Treat the hand as the ${handSide}.`,
+        'Fit the ring naturally around the finger with correct perspective, scale, occlusion, contact shadows, and lighting.',
+        'Return only the edited hand photo. Do not include the product panel, labels, split-screen layout, extra rings, text, logos, or watermarks.'
+      ].join(' ');
+
+      const image = await puter.ai.txt2img(prompt, {
+        model: 'gpt-image-2',
+        input_image: composite.split(',')[1],
+        quality: 'high'
+      });
+
+      if (typeof image === 'string') return image;
+      if (image instanceof HTMLImageElement) return image.src;
+      if (image && typeof image.src === 'string') return image.src;
+      if (image && typeof image.toDataURL === 'function') return image.toDataURL('image/png');
+      throw new Error('Puter did not return an image.');
+    }
+
+    async function createPuterReferenceImage(handSrc, productSrc) {
+      const handImg = await loadDrawable(handSrc);
+      const productImg = await loadDrawable(productSrc);
+      const canvas = document.createElement('canvas');
+      canvas.width = 1400;
+      canvas.height = 900;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f7f4ef';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const handWidth = 980;
+      const productX = 1000;
+      const productWidth = 360;
+      drawContain(ctx, handImg, 0, 0, handWidth, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(productX, 0, canvas.width - productX, canvas.height);
+      drawContain(ctx, productImg, productX + 20, 180, productWidth, 420);
+
+      ctx.fillStyle = '#2d292b';
+      ctx.font = '700 28px Manrope, sans-serif';
+      ctx.fillText('Product reference', productX + 28, 74);
+      ctx.font = '600 18px Manrope, sans-serif';
+      ctx.fillText('Use this ring design only', productX + 28, 108);
+      ctx.fillText('Output the hand photo only', productX + 28, 134);
+      return canvas.toDataURL('image/png');
     }
 
     function drawCover(ctx, img, width, height) {
@@ -821,6 +858,13 @@
       const drawWidth = img.naturalWidth * ratio;
       const drawHeight = img.naturalHeight * ratio;
       ctx.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+    }
+
+    function drawContain(ctx, img, x, y, width, height) {
+      const ratio = Math.min(width / img.naturalWidth, height / img.naturalHeight);
+      const drawWidth = img.naturalWidth * ratio;
+      const drawHeight = img.naturalHeight * ratio;
+      ctx.drawImage(img, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
     }
 
     applyRing();
