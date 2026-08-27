@@ -429,3 +429,111 @@ h2.is-visible em { color: var(--gold-bright); animation: goldGlow 3.8s ease-in-o
   .final-cta { min-height: 648px; }
   .final-cta > img { width: 108%; margin-left: -4%; }
 }
+
+/* Hero emphasis — luminous lettering and a centered, one-time product approach */
+@keyframes stauntonInnerGlow {
+  0%, 100% {
+    background-position: 120% 50%;
+    -webkit-text-stroke-color: rgba(238, 233, 223, .36);
+    text-shadow: 0 0 10px rgba(239, 185, 80, .08);
+  }
+  48%, 58% {
+    background-position: 48% 50%;
+    -webkit-text-stroke-color: rgba(239, 185, 80, .7);
+    text-shadow: 0 0 12px rgba(239, 185, 80, .26), 0 0 28px rgba(200, 151, 62, .16);
+  }
+}
+
+@keyframes heroProductZoomIn {
+  0% { opacity: 0; transform: translateY(var(--hero-shift)) scale(.78); }
+  52% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(var(--hero-shift)) scale(1); }
+}
+
+@keyframes heroProductZoomInMobile {
+  0% { opacity: 0; transform: translateY(0) scale(.82); }
+  52% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.hero-word {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px rgba(238, 233, 223, .36);
+  background:
+    linear-gradient(100deg,
+      rgba(238, 233, 223, .08) 8%,
+      rgba(238, 233, 223, .22) 31%,
+      rgba(239, 185, 80, .82) 49%,
+      rgba(200, 151, 62, .3) 58%,
+      rgba(238, 233, 223, .08) 78%);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: stauntonInnerGlow 4.6s ease-in-out infinite;
+}
+
+.hero-stage.is-visible .hero-product {
+  transform-origin: 50% 55%;
+  animation: heroProductZoomIn 1.65s cubic-bezier(.16, .82, .22, 1) .08s both;
+}
+
+/* Mobile containment: separate title, art and commerce bands without changing order */
+@media (max-width: 760px) {
+  .hero {
+    min-height: 0;
+    padding-top: 5.7rem;
+    overflow: hidden;
+  }
+  .hero-word {
+    top: 1.25rem;
+    width: calc(100% - 1rem);
+    font-size: clamp(2.85rem, 15.5vw, 4.9rem);
+    line-height: .86;
+    letter-spacing: -.055em;
+    text-align: center;
+  }
+  .hero-left {
+    position: relative;
+    z-index: 4;
+  }
+  .hero-left h1 {
+    max-width: 100%;
+    margin-inline: auto;
+    font-size: clamp(2.05rem, 10.5vw, 2.835rem);
+    line-height: .98;
+    overflow-wrap: anywhere;
+  }
+  .hero-left h1 em {
+    line-height: 1.08;
+  }
+  .hero-intro {
+    max-width: 34ch;
+  }
+  .hero-stage {
+    flex: 0 0 auto;
+    min-height: 350px;
+    margin: 1rem 0 .65rem;
+    overflow: visible;
+  }
+  .hero-stage.is-visible .hero-product,
+  .hero-product {
+    width: min(92%, 360px);
+    height: auto;
+    max-height: 330px;
+    object-fit: contain;
+  }
+  .hero-stage.is-visible .hero-product {
+    animation-name: heroProductZoomInMobile;
+  }
+  .buy-panel {
+    position: relative;
+    z-index: 4;
+    margin-top: .35rem;
+  }
+  .gallery-rail {
+    position: relative;
+    z-index: 4;
+    margin-top: .25rem;
+  }
+}
