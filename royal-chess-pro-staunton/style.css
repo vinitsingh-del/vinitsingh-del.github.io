@@ -577,3 +577,104 @@ h2.is-visible em { color: var(--gold-bright); animation: goldGlow 3.8s ease-in-o
     grid-template-columns: minmax(240px, .78fr) minmax(420px, 1.3fr) minmax(280px, .9fr);
   }
 }
+
+/* Retain the original transparent hero artwork on every viewport */
+.hero-product {
+  content: url("./assets/product-hero.webp");
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 32px 30px rgba(0, 0, 0, .48));
+}
+
+/* Mobile hero fit based on the 375 × 667 reference viewport */
+@media (max-width: 760px) {
+  .hero {
+    min-height: 0;
+    padding: 4.65rem .78rem 1.25rem;
+  }
+  .hero-word {
+    top: .9rem;
+    width: calc(100% - .65rem);
+    font-size: clamp(2.65rem, 14vw, 4.35rem);
+    line-height: .86;
+    letter-spacing: -.045em;
+    background: linear-gradient(100deg,
+      rgba(200, 151, 62, .2) 5%,
+      rgba(238, 233, 223, .3) 30%,
+      rgba(239, 185, 80, .98) 49%,
+      rgba(200, 151, 62, .42) 60%,
+      rgba(200, 151, 62, .16) 82%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .hero-left .eyebrow {
+    gap: .48rem;
+    font-size: .54rem;
+    letter-spacing: .13em;
+    white-space: nowrap;
+  }
+  .hero-left .eyebrow::before {
+    width: 1.25rem;
+  }
+  .hero-left h1 {
+    margin: .82rem auto .9rem;
+    font-size: clamp(1.95rem, 9.7vw, 2.55rem);
+    line-height: .98;
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+  .hero-left h1 em {
+    margin-top: .4rem;
+    line-height: 1.06;
+  }
+  .hero-intro {
+    max-width: 36ch;
+    margin-bottom: 0;
+    font-size: .71rem;
+    line-height: 1.58;
+  }
+  .hero-stage {
+    min-height: 306px;
+    margin: .35rem 0 .25rem;
+  }
+  .hero-stage.is-visible .hero-product,
+  .hero-product {
+    width: min(96%, 340px);
+    max-height: 304px;
+  }
+  .stage-disc {
+    bottom: .1rem;
+    width: 72%;
+  }
+  .buy-panel {
+    margin-top: .2rem;
+    padding: .9rem;
+  }
+  .product-kicker {
+    margin-top: .8rem;
+  }
+  .delivery-note {
+    margin: .72rem 0;
+  }
+  .quantity-row {
+    padding: .58rem 0;
+  }
+  .buy-panel .add-button {
+    min-height: 44px;
+    margin-top: .75rem;
+  }
+  .buy-now {
+    margin: .7rem 0 1rem;
+  }
+  .offer-card {
+    padding: .55rem .62rem;
+  }
+  .gallery-rail {
+    gap: .5rem;
+    padding-top: .7rem;
+  }
+  .gallery-thumb {
+    width: 50px;
+    height: 50px;
+  }
+}
