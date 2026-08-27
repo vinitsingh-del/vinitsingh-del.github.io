@@ -678,3 +678,34 @@ h2.is-visible em { color: var(--gold-bright); animation: goldGlow 3.8s ease-in-o
     height: 50px;
   }
 }
+
+/* Continuous Royal Chess ambient field — paint-only movement, no layout shift */
+@keyframes royalAmbientFlow {
+  0%, 100% { background-position: 12% 4%, 88% 18%, 50% 0%, 0 0; }
+  33% { background-position: 78% 22%, 28% 62%, 62% 35%, 0 0; }
+  66% { background-position: 38% 78%, 72% 42%, 35% 72%, 0 0; }
+}
+
+body {
+  background-image:
+    radial-gradient(circle at center, rgba(200, 151, 62, .13), transparent 31rem),
+    radial-gradient(circle at center, rgba(29, 67, 102, .34), transparent 39rem),
+    radial-gradient(circle at center, rgba(10, 35, 59, .46), transparent 44rem),
+    linear-gradient(180deg, #071321 0%, var(--ink) 48%, #050c16 100%);
+  background-size: 165% 165%, 180% 180%, 190% 190%, 100% 100%;
+  background-attachment: fixed;
+  animation: royalAmbientFlow 18s ease-in-out infinite;
+}
+
+/* Desktop only: a 10% approach into the approved final hero size */
+@keyframes desktopHeroTenZoom {
+  0% { opacity: .72; transform: translateY(var(--hero-shift)) scale(.9); }
+  100% { opacity: 1; transform: translateY(var(--hero-shift)) scale(1); }
+}
+
+@media (min-width: 1051px) {
+  .hero-stage.is-visible .hero-product {
+    transform-origin: 50% 55%;
+    animation: desktopHeroTenZoom 1.3s cubic-bezier(.16, .82, .22, 1) both;
+  }
+}
